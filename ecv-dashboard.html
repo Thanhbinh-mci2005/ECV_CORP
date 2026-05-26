@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECV Corp — Báo cáo Tài chính Dự án</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0A0D14; color: #E4EAF4; font-family: 'Inter', -apple-system, sans-serif; }
+    #root { min-height: 100vh; }
+    select { -webkit-appearance: auto; appearance: auto; }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    table { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <script type="text/babel" data-type="module">
+import { useState, useMemo } from "react";
+
+// ═══════════════════════════════════════
+// ECV CORP — BÁO CÁO TÀI CHÍNH DỰ ÁN
+// Power BI Style · Diverse Charts · SVG Visualizations
+// ═══════════════════════════════════════
+
+const DM_CT = [
+  { ma:"CT01",ten:"Cầu Thủ Thiêm 2",hdTri:45000,cdt:"Ban QLDA ĐTXD CT",tt:"Đang TC" },
+  { ma:"CT02",ten:"KĐT Sala Đại Quang Minh",hdTri:32000,cdt:"Đại Quang Minh",tt:"Đang TC" },
+  { ma:"CT03",ten:"Nhà máy VSIP Bình Dương",hdTri:18500,cdt:"KCN VSIP",tt:"Hoàn thành" },
+  { ma:"CT04",ten:"Cao tốc Bến Lức - Long Thành",hdTri:67000,cdt:"VEC",tt:"Đang TC" },
+  { ma:"CT05",ten:"Cảng Long An",hdTri:28000,cdt:"Cảng Long An JSC",tt:"Đang TC" },
+];
+const DM_KH = [{ma:"KH01",ten:"Ban QLDA ĐTXD CT"},{ma:"KH02",ten:"Đại Quang Minh"},{ma:"KH03",ten:"KCN VSIP"},{ma:"KH04",ten:"VEC"},{ma:"KH05",ten:"Cảng Long An JSC"}];
+const DM_NCC = [{ma:"NCC01",ten:"Thép Hòa Phát"},{ma:"NCC02",ten:"Xi măng Hà Tiên"},{ma:"NCC03",ten:"Bê tông Thủ Đức"},{ma:"NCC04",ten:"VLXD Đông Á"},{ma:"NCC05",ten:"Máy TM Phú Thái"}];
+const MONTHS = ["01/2026","02/2026","03/2026","04/2026","05/2026"];
+
+const DT = [
+  {ng:"15/01/2026",ct:"NT001",da:"CT01",ten:"Cầu Thủ Thiêm 2",gt:3200},
+  {ng:"20/01/2026",ct:"NT002",da:"CT02",ten:"KĐT Sala",gt:2100},
+  {ng:"25/01/2026",ct:"NT003",da:"CT04",ten:"Cao tốc BL-LT",gt:5500},
+  {ng:"12/02/2026",ct:"NT004",da:"CT01",ten:"Cầu Thủ Thiêm 2",gt:4100},
+  {ng:"18/02/2026",ct:"NT005",da:"CT03",ten:"Nhà máy VSIP",gt:3800},
+  {ng:"22/02/2026",ct:"NT006",da:"CT05",ten:"Cảng Long An",gt:2800},
+  {ng:"10/03/2026",ct:"NT007",da:"CT01",ten:"Cầu Thủ Thiêm 2",gt:3600},
+  {ng:"15/03/2026",ct:"NT008",da:"CT02",ten:"KĐT Sala",gt:4200},
+  {ng:"20/03/2026",ct:"NT009",da:"CT04",ten:"Cao tốc BL-LT",gt:6800},
+  {ng:"25/03/2026",ct:"NT010",da:"CT05",ten:"Cảng Long An",gt:3100},
+  {ng:"08/04/2026",ct:"NT011",da:"CT01",ten:"Cầu Thủ Thiêm 2",gt:5200},
+  {ng:"14/04/2026",ct:"NT012",da:"CT02",ten:"KĐT Sala",gt:3500},
+  {ng:"22/04/2026",ct:"NT013",da:"CT04",ten:"Cao tốc BL-LT",gt:7200},
+  {ng:"28/04/2026",ct:"NT014",da:"CT05",ten:"Cảng Long An",gt:2900},
+  {ng:"10/05/2026",ct:"NT015",da:"CT01",ten:"Cầu Thủ Thiêm 2",gt:4800},
+  {ng:"16/05/2026",ct:"NT016",da:"CT02",ten:"KĐT Sala",gt:3900},
+  {ng:"20/05/2026",ct:"NT017",da:"CT04",ten:"Cao tốc BL-LT",gt:8100},
+];
+const CN = [
+  // Phải thu — mỗi dòng = 1 khoản nợ phát sinh (nghiệm thu), có hạn TT + đã TT
+  {id:1,loai:"PT",kh:"KH01",da:"CT01",ng:"15/01/2026",ct:"NT001",dg:"Nghiệm thu đợt 1",ps:3200,daTT:3200},
+  {id:2,loai:"PT",kh:"KH02",da:"CT02",ng:"20/01/2026",ct:"NT002",dg:"Nghiệm thu đợt 1",ps:2100,daTT:2100},
+  {id:3,loai:"PT",kh:"KH04",da:"CT04",ng:"25/01/2026",ct:"NT003",dg:"Nghiệm thu đợt 1",ps:5500,daTT:5000},
+  {id:4,loai:"PT",kh:"KH01",da:"CT01",ng:"12/02/2026",ct:"NT004",dg:"Nghiệm thu đợt 2",ps:4100,daTT:4100},
+  {id:5,loai:"PT",kh:"KH03",da:"CT03",ng:"18/02/2026",ct:"NT005",dg:"Nghiệm thu QT",ps:3800,daTT:3800},
+  {id:6,loai:"PT",kh:"KH05",da:"CT05",ng:"22/02/2026",ct:"NT006",dg:"Nghiệm thu đợt 1",ps:2800,daTT:2800},
+  {id:7,loai:"PT",kh:"KH01",da:"CT01",ng:"10/03/2026",ct:"NT007",dg:"Nghiệm thu đợt 3",ps:3600,daTT:2000},
+  {id:8,loai:"PT",kh:"KH02",da:"CT02",ng:"15/03/2026",ct:"NT008",dg:"Nghiệm thu đợt 2",ps:4200,daTT:4200},
+  {id:9,loai:"PT",kh:"KH04",da:"CT04",ng:"20/03/2026",ct:"NT009",dg:"Nghiệm thu đợt 2",ps:6800,daTT:3500},
+  {id:10,loai:"PT",kh:"KH05",da:"CT05",ng:"25/03/2026",ct:"NT010",dg:"Nghiệm thu đợt 2",ps:3100,daTT:0},
+  {id:11,loai:"PT",kh:"KH01",da:"CT01",ng:"08/04/2026",ct:"NT011",dg:"Nghiệm thu đợt 4",ps:5200,daTT:2000},
+  {id:12,loai:"PT",kh:"KH02",da:"CT02",ng:"14/04/2026",ct:"NT012",dg:"Nghiệm thu đợt 3",ps:3500,daTT:0},
+  {id:13,loai:"PT",kh:"KH04",da:"CT04",ng:"22/04/2026",ct:"NT013",dg:"Nghiệm thu đợt 3",ps:7200,daTT:0},
+  {id:14,loai:"PT",kh:"KH05",da:"CT05",ng:"28/04/2026",ct:"NT014",dg:"Nghiệm thu đợt 3",ps:2900,daTT:0},
+  {id:15,loai:"PT",kh:"KH01",da:"CT01",ng:"10/05/2026",ct:"NT015",dg:"Nghiệm thu đợt 5",ps:4800,daTT:0},
+  {id:16,loai:"PT",kh:"KH02",da:"CT02",ng:"16/05/2026",ct:"NT016",dg:"Nghiệm thu đợt 4",ps:3900,daTT:0},
+  {id:17,loai:"PT",kh:"KH04",da:"CT04",ng:"20/05/2026",ct:"NT017",dg:"Nghiệm thu đợt 4",ps:8100,daTT:0},
+  // Phải trả
+  {id:21,loai:"PTr",kh:"NCC01",da:"CT01",ng:"15/01/2026",ct:"BN001",dg:"Nhập thép phi 16",ps:3500,daTT:2200},
+  {id:22,loai:"PTr",kh:"NCC02",da:"CT02",ng:"20/01/2026",ct:"BN002",dg:"Nhập xi măng",ps:2800,daTT:1500},
+  {id:23,loai:"PTr",kh:"NCC03",da:"CT04",ng:"10/02/2026",ct:"BN003",dg:"Nhập bê tông M300",ps:4200,daTT:4200},
+  {id:24,loai:"PTr",kh:"NCC04",da:"CT05",ng:"15/02/2026",ct:"BN004",dg:"Nhập cừ Larsen",ps:3800,daTT:1800},
+  {id:25,loai:"PTr",kh:"NCC05",da:"CT04",ng:"01/03/2026",ct:"BN005",dg:"Thuê TB tháng 3",ps:1200,daTT:1200},
+  {id:26,loai:"PTr",kh:"NCC05",da:"CT01",ng:"05/03/2026",ct:"BN006",dg:"Thuê TB tháng 3",ps:850,daTT:850},
+  {id:27,loai:"PTr",kh:"NCC01",da:"CT04",ng:"20/03/2026",ct:"BN007",dg:"Nhập thép hình",ps:5200,daTT:3200},
+  {id:28,loai:"PTr",kh:"NCC03",da:"CT01",ng:"10/04/2026",ct:"BN008",dg:"Nhập bê tông",ps:2500,daTT:0},
+  {id:29,loai:"PTr",kh:"NCC04",da:"CT05",ng:"15/04/2026",ct:"BN009",dg:"Nhập VT cảng",ps:1800,daTT:0},
+  {id:30,loai:"PTr",kh:"NCC01",da:"CT04",ng:"05/05/2026",ct:"BN010",dg:"Nhập thép bản",ps:3600,daTT:0},
+];
+const TN = [
+  {loaiQ:"TM",ng:"05/01/2026",ctThu:"PT001",ctChi:"",dg:"Thu TM từ CĐT CT01",da:"CT01",thu:800,chi:0},
+  {loaiQ:"TM",ng:"12/01/2026",ctThu:"",ctChi:"PC001",dg:"Chi mua VPP",da:"",thu:0,chi:45},
+  {loaiQ:"TM",ng:"20/01/2026",ctThu:"PT002",ctChi:"",dg:"Thu TM từ CĐT CT05",da:"CT05",thu:500,chi:0},
+  {loaiQ:"TM",ng:"15/02/2026",ctThu:"",ctChi:"PC002",dg:"Chi lương VP T1",da:"",thu:0,chi:850},
+  {loaiQ:"TM",ng:"08/03/2026",ctThu:"PT003",ctChi:"",dg:"Thu TM từ CĐT CT02",da:"CT02",thu:600,chi:0},
+  {loaiQ:"TM",ng:"25/03/2026",ctThu:"",ctChi:"PC003",dg:"Chi dụng cụ CT01",da:"CT01",thu:0,chi:320},
+  {loaiQ:"TM",ng:"10/04/2026",ctThu:"PT004",ctChi:"",dg:"Thu TM từ CĐT CT04",da:"CT04",thu:1200,chi:0},
+  {loaiQ:"TM",ng:"22/04/2026",ctThu:"",ctChi:"PC004",dg:"Chi lương VP T3",da:"",thu:0,chi:850},
+  {loaiQ:"TM",ng:"05/05/2026",ctThu:"PT005",ctChi:"",dg:"Thu TM từ CĐT CT01",da:"CT01",thu:700,chi:0},
+  {loaiQ:"NH",ng:"10/01/2026",ctThu:"GBC001",ctChi:"",dg:"Nhận tiền CĐT CT04",da:"CT04",thu:5000,chi:0},
+  {loaiQ:"NH",ng:"15/01/2026",ctThu:"",ctChi:"UNC001",dg:"TT thép Hòa Phát",da:"CT01",thu:0,chi:2200},
+  {loaiQ:"NH",ng:"25/01/2026",ctThu:"GBC002",ctChi:"",dg:"Nhận tiền CĐT CT01",da:"CT01",thu:3200,chi:0},
+  {loaiQ:"NH",ng:"05/02/2026",ctThu:"",ctChi:"UNC002",dg:"TT xi măng",da:"CT02",thu:0,chi:1500},
+  {loaiQ:"NH",ng:"12/02/2026",ctThu:"GBC003",ctChi:"",dg:"Nhận tiền CĐT CT03",da:"CT03",thu:3800,chi:0},
+  {loaiQ:"NH",ng:"20/02/2026",ctThu:"",ctChi:"UNC003",dg:"TT thuê TB CT05",da:"CT05",thu:0,chi:1800},
+  {loaiQ:"NH",ng:"28/02/2026",ctThu:"GBC004",ctChi:"",dg:"Nhận tiền CĐT CT05",da:"CT05",thu:2800,chi:0},
+  {loaiQ:"NH",ng:"08/03/2026",ctThu:"GBC005",ctChi:"",dg:"Nhận tiền CĐT CT04",da:"CT04",thu:6500,chi:0},
+  {loaiQ:"NH",ng:"15/03/2026",ctThu:"",ctChi:"UNC004",dg:"TT NTP CT04",da:"CT04",thu:0,chi:3200},
+  {loaiQ:"NH",ng:"22/03/2026",ctThu:"GBC006",ctChi:"",dg:"Nhận tiền CĐT CT02",da:"CT02",thu:4000,chi:0},
+  {loaiQ:"NH",ng:"01/04/2026",ctThu:"",ctChi:"UNC005",dg:"TT vật tư CT01",da:"CT01",thu:0,chi:2800},
+  {loaiQ:"NH",ng:"10/04/2026",ctThu:"GBC007",ctChi:"",dg:"Nhận tiền CĐT CT01",da:"CT01",thu:5200,chi:0},
+  {loaiQ:"NH",ng:"18/04/2026",ctThu:"",ctChi:"UNC006",dg:"TT thuê TB CT04",da:"CT04",thu:0,chi:4500},
+  {loaiQ:"NH",ng:"25/04/2026",ctThu:"GBC008",ctChi:"",dg:"Nhận tiền CĐT CT05",da:"CT05",thu:3200,chi:0},
+  {loaiQ:"NH",ng:"05/05/2026",ctThu:"GBC009",ctChi:"",dg:"Nhận tiền CĐT CT02",da:"CT02",thu:4500,chi:0},
+  {loaiQ:"NH",ng:"12/05/2026",ctThu:"",ctChi:"UNC007",dg:"TT NTP+VT CT01",da:"CT01",thu:0,chi:3800},
+  {loaiQ:"NH",ng:"18/05/2026",ctThu:"GBC010",ctChi:"",dg:"Nhận tiền CĐT CT04",da:"CT04",thu:6500,chi:0},
+  {loaiQ:"NH",ng:"22/05/2026",ctThu:"",ctChi:"UNC008",dg:"TT thuê TB CT05",da:"CT05",thu:0,chi:2400},
+];
+const CP = [
+  {da:"CT01",maCP:"CPNVL",ten:"CP Nguyên vật liệu",ps:3560},{da:"CT01",maCP:"CPMTC",ten:"CP Máy thi công",ps:1178},
+  {da:"CT01",maCP:"CPNC",ten:"CP Nhân công",ps:2800},{da:"CT01",maCP:"TP",ten:"Thầu phụ",ps:3200},
+  {da:"CT02",maCP:"CPNVL",ten:"CP NVL",ps:1050},{da:"CT02",maCP:"CPMTC",ten:"CP MTC",ps:870},{da:"CT02",maCP:"CPNC",ten:"CP NC",ps:1900},
+  {da:"CT04",maCP:"CPNVL",ten:"CP NVL",ps:824},{da:"CT04",maCP:"CPMTC",ten:"CP MTC",ps:1609},
+  {da:"CT04",maCP:"CPNC",ten:"CP NC",ps:4200},{da:"CT04",maCP:"TP",ten:"Thầu phụ",ps:5800},
+  {da:"CT05",maCP:"CPNVL",ten:"CP NVL",ps:1530},{da:"CT05",maCP:"CPMTC",ten:"CP MTC",ps:773},
+  {da:"CT05",maCP:"CPNC",ten:"CP NC",ps:1500},{da:"CT05",maCP:"TP",ten:"Thầu phụ",ps:1800},
+  {da:"CT03",maCP:"CPNVL",ten:"CP NVL",ps:1200},{da:"CT03",maCP:"CPMTC",ten:"CP MTC",ps:450},{da:"CT03",maCP:"CPNC",ten:"CP NC",ps:980},
+];
+const CPVP = {luong:1850,bhxh:520,thue:280,dien:85,vpp:45,hc:120,ql:200};
+const CPVP_total = Object.values(CPVP).reduce((s,v)=>s+v,0);
+
+// HÀNG KHO (Mẫu biểu 3)
+const KHO = [
+  {maVT:"VT01",ten:"Thép Phi 16",dvt:"Tấn",kho:"K01",da:"CT01",ncc:"NCC01",tonDau:50,nhapSL:120,nhapGia:18.5,xuatSL:95,ng:"15/01/2026"},
+  {maVT:"VT02",ten:"Xi măng PCB40",dvt:"Tấn",kho:"K01",da:"CT02",ncc:"NCC02",tonDau:200,nhapSL:500,nhapGia:2.1,xuatSL:420,ng:"20/01/2026"},
+  {maVT:"VT03",ten:"Cát vàng",dvt:"m³",kho:"K02",da:"CT04",ncc:"NCC04",tonDau:300,nhapSL:800,nhapGia:0.35,xuatSL:750,ng:"25/01/2026"},
+  {maVT:"VT04",ten:"Đá 1×2",dvt:"m³",kho:"K02",da:"CT01",ncc:"NCC04",tonDau:150,nhapSL:600,nhapGia:0.42,xuatSL:520,ng:"10/02/2026"},
+  {maVT:"VT05",ten:"Cừ Larsen SP-IV",dvt:"Cây",kho:"K03",da:"CT05",ncc:"NCC04",tonDau:100,nhapSL:200,nhapGia:8.5,xuatSL:180,ng:"15/02/2026"},
+  {maVT:"VT06",ten:"Bê tông M300",dvt:"m³",kho:"K01",da:"CT04",ncc:"NCC03",tonDau:0,nhapSL:350,nhapGia:1.65,xuatSL:340,ng:"10/03/2026"},
+  {maVT:"VT07",ten:"Thép hình H200",dvt:"Tấn",kho:"K01",da:"CT01",ncc:"NCC01",tonDau:30,nhapSL:80,nhapGia:22,xuatSL:72,ng:"20/03/2026"},
+  {maVT:"VT08",ten:"Ván khuôn phủ phim",dvt:"m²",kho:"K02",da:"CT02",ncc:"NCC04",tonDau:500,nhapSL:300,nhapGia:0.28,xuatSL:600,ng:"05/04/2026"},
+];
+
+// TÀI SẢN / CCDC (Mẫu biểu 4)
+const TSCD = [
+  {ma:"TS01",loai:"Máy",ten:"Máy cẩu 50T",ngTang:"15/03/2023",ngGia:1200,thKH:60,da:"CT01",thoVH:"Nguyễn Văn A",tt:"Hoạt động"},
+  {ma:"TS02",loai:"Máy",ten:"Máy đào PC200",ngTang:"01/06/2023",ngGia:900,thKH:60,da:"CT04",thoVH:"Trần Văn B",tt:"Hoạt động"},
+  {ma:"TS03",loai:"Máy",ten:"Máy ép cọc",ngTang:"20/01/2024",ngGia:2100,thKH:72,da:"CT05",thoVH:"Lê Văn C",tt:"Hoạt động"},
+  {ma:"TS04",loai:"Xe",ten:"Xe lu rung 12T",ngTang:"10/08/2023",ngGia:650,thKH:60,da:"CT04",thoVH:"Phạm Văn D",tt:"Hoạt động"},
+  {ma:"TS05",loai:"Máy",ten:"Trạm trộn BT 60m³/h",ngTang:"05/11/2022",ngGia:1800,thKH:72,da:"CT02",thoVH:"Hoàng Văn E",tt:"Hoạt động"},
+  {ma:"TS06",loai:"Máy",ten:"Máy phát điện 250KVA",ngTang:"12/09/2024",ngGia:380,thKH:48,da:"CT01",thoVH:"Võ Văn F",tt:"Hoạt động"},
+  {ma:"TS07",loai:"Xe",ten:"Xe ben 15T",ngTang:"20/04/2024",ngGia:520,thKH:60,da:"CT04",thoVH:"Đỗ Văn G",tt:"Sửa chữa"},
+];
+const LUANCHUYEN = [
+  {ma:"TS01",da:"CT01",tu:"01/01/2026",den:"15/03/2026"},{ma:"TS01",da:"CT04",tu:"16/03/2026",den:"30/04/2026"},{ma:"TS01",da:"CT01",tu:"01/05/2026",den:""},
+  {ma:"TS02",da:"CT04",tu:"01/01/2026",den:""},{ma:"TS03",da:"CT05",tu:"01/01/2026",den:""},
+  {ma:"TS07",da:"CT02",tu:"01/01/2026",den:"28/02/2026"},{ma:"TS07",da:"CT04",tu:"01/03/2026",den:""},
+];
+const NHIENLIEU = [
+  {ma:"TS01",dauDZ:2850,dauTL:120,dauDC:85,mo:30,sc:450},
+  {ma:"TS02",dauDZ:3200,dauTL:150,dauDC:95,mo:45,sc:280},
+  {ma:"TS03",dauDZ:4100,dauTL:200,dauDC:110,mo:55,sc:620},
+  {ma:"TS04",dauDZ:1800,dauTL:80,dauDC:60,mo:20,sc:180},
+  {ma:"TS05",dauDZ:1500,dauTL:0,dauDC:70,mo:15,sc:350},
+  {ma:"TS06",dauDZ:2200,dauTL:0,dauDC:45,mo:10,sc:120},
+  {ma:"TS07",dauDZ:2600,dauTL:90,dauDC:75,mo:25,sc:520},
+];
+
+// ─── HELPERS ───
+const f=n=>{if(n==null||isNaN(n))return"—";const a=Math.abs(n),sg=n<0?"-":"";if(a>=1000)return sg+(a/1000).toFixed(2).replace(/\.?0+$/,"")+" tỷ";if(a>=1)return sg+a.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")+" tr";return sg+(a*1000).toFixed(0)+" ng";};
+const fn=n=>n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",");
+const pv=(a,b)=>b===0?0:((a/b)*100);
+const ps=(a,b)=>b===0?"—":pv(a,b).toFixed(1)+"%";
+const gCT=ma=>DM_CT.find(c=>c.ma===ma);
+const gM=ng=>ng?.slice(3,10)||"";
+const inM=(ng,m)=>!m||m==="ALL"||gM(ng)===m;
+const inD=(da,fl)=>!fl||fl==="ALL"||da===fl;
+const parseDate=s=>{if(!s)return new Date(0);if(s.includes("-")){return new Date(s);}const p=s.split("/");return new Date(+p[2],+p[1]-1,+p[0]);};
+const inDateRange=(ng,from,to)=>{const d=parseDate(ng),fd=parseDate(from),td=parseDate(to);return d>=fd&&d<=td;};
+
+// ─── DESIGN ───
+const T={bg:"#0A0D14",pnl:"#0F1219",card:"#151B28",alt:"#1A2235",bdr:"#222D42",tx:"#E4EAF4",txD:"#7A869C",txM:"#515E74",bl:"#4A90E2",blG:"rgba(74,144,226,0.12)",gn:"#2ECC71",rd:"#E74C3C",am:"#F39C12",pr:"#9B59B6",cy:"#1ABC9C",or:"#E67E22"};
+const BC=["#4A90E2","#2ECC71","#F39C12","#E74C3C","#9B59B6","#1ABC9C","#E67E22","#3498DB"];
+
+// ═══════════════════════════════════════
+// CHART COMPONENTS — SVG based
+// ═══════════════════════════════════════
+
+// 1. DONUT CHART
+const Donut=({data,size=160,hole=0.6,showLegend=true})=>{
+  const total=data.reduce((s,d)=>s+d.v,0);
+  if(total===0)return <div style={{textAlign:"center",color:T.txM,padding:20}}>Không có dữ liệu</div>;
+  const r=size/2, ir=r*hole;
+  let cum=0;
+  const arcs=data.map((d,i)=>{
+    const pct=d.v/total, start=cum, end=cum+pct;
+    cum=end;
+    const s1=start*Math.PI*2-Math.PI/2, e1=end*Math.PI*2-Math.PI/2;
+    const x1=r+r*.9*Math.cos(s1), y1=r+r*.9*Math.sin(s1);
+    const x2=r+r*.9*Math.cos(e1), y2=r+r*.9*Math.sin(e1);
+    const x3=r+ir*Math.cos(e1), y3=r+ir*Math.sin(e1);
+    const x4=r+ir*Math.cos(s1), y4=r+ir*Math.sin(s1);
+    const large=pct>.5?1:0;
+    const path=`M${x1},${y1} A${r*.9},${r*.9} 0 ${large},1 ${x2},${y2} L${x3},${y3} A${ir},${ir} 0 ${large},0 ${x4},${y4} Z`;
+    return <path key={i} d={path} fill={BC[i%BC.length]} opacity={.9}/>;
+  });
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        {arcs}
+        <text x={r} y={r-6} textAnchor="middle" fill={T.tx} fontSize={16} fontWeight={700} fontFamily="'DM Mono',monospace">{f(total)}</text>
+        <text x={r} y={r+10} textAnchor="middle" fill={T.txD} fontSize={9}>Tổng</text>
+      </svg>
+      {showLegend&&<div style={{display:"flex",flexDirection:"column",gap:4}}>
+        {data.map((d,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:5,fontSize:10}}>
+            <div style={{width:8,height:8,borderRadius:2,background:BC[i%BC.length],flexShrink:0}}/>
+            <span style={{color:T.txD}}>{d.l}</span>
+            <span style={{color:T.tx,fontFamily:"'DM Mono',monospace",marginLeft:"auto"}}>{f(d.v)}</span>
+            <span style={{color:T.txM,width:35,textAlign:"right"}}>{(d.v/total*100).toFixed(0)}%</span>
+          </div>
+        ))}
+      </div>}
+    </div>
+  );
+};
+
+// 2. LINE / AREA CHART
+const AreaChart=({data,h=140,w=320,color=T.bl,showDots=true,fill=true})=>{
+  const mx=Math.max(...data.map(d=>d.v),1);
+  const pad={t:20,b:24,l:8,r:8};
+  const cw=w-pad.l-pad.r, ch=h-pad.t-pad.b;
+  const pts=data.map((d,i)=>({x:pad.l+i*(cw/(data.length-1||1)),y:pad.t+ch-((d.v/mx)*ch)}));
+  const line=pts.map((p,i)=>`${i===0?"M":"L"}${p.x},${p.y}`).join(" ");
+  const area=line+` L${pts[pts.length-1].x},${pad.t+ch} L${pts[0].x},${pad.t+ch} Z`;
+  return (
+    <svg width="100%" viewBox={`0 0 ${w} ${h}`} style={{overflow:"visible"}}>
+      <defs><linearGradient id="areaG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity=".3"/><stop offset="100%" stopColor={color} stopOpacity=".02"/></linearGradient></defs>
+      {[0,.25,.5,.75,1].map((r,i)=><line key={i} x1={pad.l} y1={pad.t+ch*r} x2={w-pad.r} y2={pad.t+ch*r} stroke={T.bdr} strokeWidth=".5" strokeDasharray={r>0&&r<1?"3,3":"0"}/>)}
+      {fill&&<path d={area} fill="url(#areaG)"/>}
+      <path d={line} fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"/>
+      {showDots&&pts.map((p,i)=><g key={i}><circle cx={p.x} cy={p.y} r={4} fill={T.card} stroke={color} strokeWidth={2}/><text x={p.x} y={p.y-10} textAnchor="middle" fill={T.tx} fontSize={8.5} fontFamily="'DM Mono',monospace">{f(data[i].v)}</text></g>)}
+      {data.map((d,i)=><text key={i} x={pts[i].x} y={h-4} textAnchor="middle" fill={T.txD} fontSize={8}>{d.l}</text>)}
+    </svg>
+  );
+};
+
+// 3. WATERFALL CHART
+const Waterfall=({items,h=170,w=340})=>{
+  const vals=items.map(it=>it.v);
+  const mx=Math.max(...vals.map(Math.abs),1);
+  const pad={t:22,b:26,l:8,r:8};
+  const cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
+  const bw=cw/items.length*.6, gap=cw/items.length*.4;
+  return (
+    <svg width="100%" viewBox={`0 0 ${w} ${h}`}>
+      {items.map((it,i)=>{
+        const bx=pad.l+i*(bw+gap)+gap/2;
+        const bh=Math.max((it.v/mx)*ch*.8,4);
+        const by=it.type==="neg"?pad.t+(ch-bh)/2:pad.t+(ch-bh)/2;
+        const col=it.type==="neg"?T.rd:it.type==="result"?T.cy:T.gn;
+        return <g key={i}>
+          <rect x={bx} y={pad.t+ch-bh-2} width={bw} height={bh} rx={4} fill={col} opacity={.85}/>
+          <text x={bx+bw/2} y={pad.t+ch-bh-8} textAnchor="middle" fill={T.tx} fontSize={9} fontFamily="'DM Mono',monospace" fontWeight={600}>{f(it.v)}</text>
+          <text x={bx+bw/2} y={h-6} textAnchor="middle" fill={T.txD} fontSize={8}>{it.l}</text>
+        </g>;
+      })}
+    </svg>
+  );
+};
+
+// 4. GAUGE / SPEEDOMETER
+const Gauge=({value,max=100,label,color=T.bl,size=120})=>{
+  const pct=Math.min(value/max,1);
+  const r=size/2-10, cx=size/2, cy=size/2+5;
+  const startA=-Math.PI*.8, endA=Math.PI*.8, range=endA-startA;
+  const descArc=(sa,ea)=>{
+    const x1=cx+r*Math.cos(sa),y1=cy+r*Math.sin(sa),x2=cx+r*Math.cos(ea),y2=cy+r*Math.sin(ea);
+    const large=(ea-sa)>Math.PI?1:0;
+    return `M${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2}`;
+  };
+  return (
+    <div style={{textAlign:"center"}}>
+      <svg width={size} height={size*.7} viewBox={`0 0 ${size} ${size*.75}`}>
+        <path d={descArc(startA,endA)} fill="none" stroke={T.bdr} strokeWidth={8} strokeLinecap="round"/>
+        <path d={descArc(startA,startA+range*pct)} fill="none" stroke={color} strokeWidth={8} strokeLinecap="round"/>
+        <text x={cx} y={cy-4} textAnchor="middle" fill={T.tx} fontSize={18} fontWeight={700} fontFamily="'DM Mono',monospace">{typeof value==="string"?value:(value).toFixed(1)+"%"}</text>
+        <text x={cx} y={cy+12} textAnchor="middle" fill={T.txD} fontSize={8.5}>{label}</text>
+      </svg>
+    </div>
+  );
+};
+
+// 5. STACKED BAR (Thu vs Chi)
+const StackedBar=({data,h=150,w=320})=>{
+  const mx=Math.max(...data.map(d=>d.a+d.b),1);
+  const pad={t:16,b:24,l:8,r:8};
+  const cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
+  const bw=cw/data.length*.55;
+  return (
+    <svg width="100%" viewBox={`0 0 ${w} ${h}`}>
+      {data.map((d,i)=>{
+        const x=pad.l+i*(cw/data.length)+(cw/data.length-bw)/2;
+        const ha=(d.a/mx)*ch, hb=(d.b/mx)*ch;
+        return <g key={i}>
+          <rect x={x} y={pad.t+ch-ha-hb} width={bw} height={ha} rx={3} fill={T.gn} opacity={.85}/>
+          <rect x={x} y={pad.t+ch-hb} width={bw} height={hb} rx={3} fill={T.rd} opacity={.75}/>
+          {ha>15&&<text x={x+bw/2} y={pad.t+ch-hb-ha/2+4} textAnchor="middle" fill="#fff" fontSize={7.5} fontFamily="'DM Mono',monospace">{f(d.a)}</text>}
+          {hb>15&&<text x={x+bw/2} y={pad.t+ch-hb/2+4} textAnchor="middle" fill="#fff" fontSize={7.5} fontFamily="'DM Mono',monospace">{f(d.b)}</text>}
+          <text x={x+bw/2} y={h-6} textAnchor="middle" fill={T.txD} fontSize={8}>{d.l}</text>
+        </g>;
+      })}
+      <g transform={`translate(${w-70},${pad.t})`}>
+        <rect width={7} height={7} rx={2} fill={T.gn}/><text x={10} y={7} fill={T.txD} fontSize={7.5}>Thu</text>
+        <rect y={12} width={7} height={7} rx={2} fill={T.rd}/><text x={10} y={19} fill={T.txD} fontSize={7.5}>Chi</text>
+      </g>
+    </svg>
+  );
+};
+
+// 6. PROGRESS BAR with labels
+const ProgressBar=({label,value,max,color=T.bl,sub})=>{
+  const pct=max>0?Math.min(value/max*100,100):0;
+  return (
+    <div style={{marginBottom:8}}>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:3}}>
+        <span style={{color:T.txD}}>{label}</span>
+        <span style={{color:T.tx,fontFamily:"'DM Mono',monospace"}}>{f(value)} / {f(max)} <span style={{color:color}}>({pct.toFixed(1)}%)</span></span>
+      </div>
+      <div style={{height:10,background:"rgba(255,255,255,0.04)",borderRadius:5,overflow:"hidden"}}>
+        <div style={{width:`${pct}%`,height:"100%",background:`linear-gradient(90deg,${color},${color}88)`,borderRadius:5}}/>
+      </div>
+      {sub&&<div style={{fontSize:8.5,color:T.txM,marginTop:2}}>{sub}</div>}
+    </div>
+  );
+};
+
+// 7. GROUPED BAR (DT vs CP)
+const GroupedBar=({data,h=155,w=340,lA="Doanh thu",lB="Chi phí",cA=T.bl,cB=T.or})=>{
+  const mx=Math.max(...data.flatMap(d=>[d.a,d.b]),1);
+  const pad={t:18,b:24,l:8,r:8};
+  const cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
+  const gw=cw/data.length, bw=gw*.32;
+  return (
+    <svg width="100%" viewBox={`0 0 ${w} ${h}`}>
+      {data.map((d,i)=>{
+        const gx=pad.l+i*gw;
+        const ha=(d.a/mx)*ch, hb=(d.b/mx)*ch;
+        return <g key={i}>
+          <rect x={gx+gw*.1} y={pad.t+ch-ha} width={bw} height={ha} rx={3} fill={cA} opacity={.85}/>
+          <rect x={gx+gw*.1+bw+2} y={pad.t+ch-hb} width={bw} height={hb} rx={3} fill={cB} opacity={.8}/>
+          <text x={gx+gw/2} y={h-6} textAnchor="middle" fill={T.txD} fontSize={7.5}>{d.l}</text>
+        </g>;
+      })}
+      <g transform={`translate(${w-90},${pad.t})`}>
+        <rect width={7} height={7} rx={2} fill={cA}/><text x={10} y={7} fill={T.txD} fontSize={7.5}>{lA}</text>
+        <rect y={12} width={7} height={7} rx={2} fill={cB}/><text x={10} y={19} fill={T.txD} fontSize={7.5}>{lB}</text>
+      </g>
+    </svg>
+  );
+};
+
+// ─── BASE COMPONENTS (existing) ───
+const Select=({label,value,onChange,options,w=140})=>(<div style={{display:"flex",alignItems:"center",gap:5}}><span style={{fontSize:10,color:T.txM,fontWeight:600,textTransform:"uppercase",letterSpacing:.6,whiteSpace:"nowrap"}}>{label}</span><select value={value} onChange={e=>onChange(e.target.value)} style={{background:T.alt,border:`1px solid ${T.bdr}`,borderRadius:6,padding:"5px 8px",color:T.tx,fontSize:11,fontWeight:500,cursor:"pointer",minWidth:w,outline:"none"}}>{options.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}</select></div>);
+const FilterRow=({children})=>(<div style={{display:"flex",flexWrap:"wrap",gap:10,marginBottom:12,padding:"8px 0",borderBottom:`1px solid ${T.bdr}15`}}>{children}</div>);
+const KPI=({label,value,sub,color=T.bl,accent})=>(<div style={{background:T.card,borderRadius:10,padding:"13px 15px",border:`1px solid ${T.bdr}`,flex:"1 1 145px",minWidth:140,position:"relative",overflow:"hidden"}}><div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:color}}/><div style={{fontSize:10,color:T.txD,marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>{label}</div><div style={{fontSize:19,fontWeight:700,color:T.tx,fontFamily:"'DM Mono',monospace"}}>{value}</div>{sub&&<div style={{fontSize:9.5,color:accent||T.txD,marginTop:2}}>{sub}</div>}</div>);
+const Tbl=({cols,rows,maxH=340})=>{
+  return(
+    <div style={{overflowX:"auto",overflowY:"auto",maxHeight:maxH,borderRadius:8,border:`1px solid ${T.bdr}`}}>
+      <table style={{width:"100%",borderCollapse:"collapse",fontSize:11.5}}>
+        <thead><tr>{cols.map((c,i)=>(
+          <th key={i} style={{padding:"8px 10px",background:"#131825",color:T.txD,fontWeight:600,textAlign:c.a||"left",whiteSpace:"nowrap",borderBottom:`1px solid ${T.bdr}`,position:"sticky",top:0,zIndex:2,fontSize:10,textTransform:"uppercase",letterSpacing:.4}}>{c.l}</th>
+        ))}</tr></thead>
+        <tbody>{rows.map((r,ri)=>(
+          <tr key={ri} style={{background:ri%2===0?"transparent":"rgba(255,255,255,0.015)"}}>
+            {cols.map((c,ci)=>{
+              const cellColor = r._c && r._c[c.k] ? r._c[c.k] : T.tx;
+              return(
+                <td key={ci} style={{padding:"7px 10px",color:cellColor,borderBottom:"1px solid rgba(34,45,66,0.07)",textAlign:c.a||"left",whiteSpace:"nowrap",fontFamily:c.m?"'DM Mono',monospace":"inherit",fontWeight:c.m?500:400}}>{r[c.k]}</td>
+              );
+            })}
+          </tr>
+        ))}</tbody>
+      </table>
+    </div>
+  );
+};
+const HBar=({data})=>data.map((d,i)=>{const mx=Math.max(...data.map(x=>x.v),1);return(<div key={i} style={{display:"flex",alignItems:"center",marginBottom:5,gap:5}}><div style={{width:90,fontSize:10,color:T.txD,textAlign:"right",flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{d.l}</div><div style={{flex:1,height:15,background:"rgba(255,255,255,0.025)",borderRadius:3,overflow:"hidden"}}><div style={{width:`${(d.v/mx)*100}%`,height:"100%",background:BC[i%BC.length],borderRadius:3}}/></div><div style={{width:62,fontSize:10,color:T.tx,fontFamily:"'DM Mono',monospace",textAlign:"right",flexShrink:0}}>{f(d.v)}</div></div>);});
+const Box=({children,title})=>(<div style={{background:T.card,borderRadius:10,padding:15,border:`1px solid ${T.bdr}`,marginBottom:11}}>{title&&<div style={{fontSize:12.5,fontWeight:700,color:T.tx,marginBottom:10,display:"flex",alignItems:"center",gap:5}}><div style={{width:3,height:14,background:T.bl,borderRadius:2}}/>{title}</div>}{children}</div>);
+
+// ═══════════════════════════════════════
+// PAGE 1: TỔNG QUAN
+// ═══════════════════════════════════════
+const P1=()=>{
+  const [dateFrom,setDateFrom]=useState("01/01/2026");
+  const [dateTo,setDateTo]=useState("26/05/2026");
+  const [khSel,setKhSel]=useState([]);
+  const [daSel,setDaSel]=useState([]);
+  const dtF=DT.filter(d=>inDateRange(d.ng,dateFrom,dateTo));
+  const tongDT=dtF.reduce((s,d)=>s+d.gt,0);
+  const cpAll=CP.reduce((s,c)=>s+c.ps,0);
+  const loiNhuan=tongDT-cpAll-CPVP_total;
+  const cnPT=CN.filter(c=>c.loai==="PT"), cnPTr=CN.filter(c=>c.loai==="PTr");
+  const pthu=cnPT.reduce((s,c)=>s+c.ps-c.daTT,0);
+  const ptra=cnPTr.reduce((s,c)=>s+c.ps-c.daTT,0);
+  const tnF=TN.filter(t=>inDateRange(t.ng,dateFrom,dateTo));
+  const tThu=tnF.reduce((s,t)=>s+t.thu,0), tChi=tnF.reduce((s,t)=>s+t.chi,0);
+  // Chart data
+  const dtByM=MONTHS.map(m=>({l:"T"+m.slice(0,2),v:DT.filter(d=>gM(d.ng)===m).reduce((s,d)=>s+d.gt,0)}));
+  const dtCum=dtByM.reduce((acc,d)=>{const last=acc.length?acc[acc.length-1].v:0;acc.push({l:d.l,v:last+d.v});return acc;},[]);
+  const gbData=DM_CT.map(ct=>({l:ct.ten.split(" ").slice(0,2).join(" "),a:DT.filter(d=>d.da===ct.ma).reduce((s,d)=>s+d.gt,0),b:CP.filter(c=>c.da===ct.ma).reduce((s,c)=>s+c.ps,0)})).filter(d=>d.a>0||d.b>0);
+  const marginPct=tongDT>0?pv(loiNhuan,tongDT):0;
+  // Dòng tiền thu vs chi theo tháng
+  const cfByMonth=MONTHS.map(m=>{const d=TN.filter(t=>gM(t.ng)===m);return{l:"T"+m.slice(0,2),a:d.reduce((s,t)=>s+t.thu,0),b:d.reduce((s,t)=>s+t.chi,0)};});
+  // Tiến độ NT/HĐ
+  const ntData=DM_CT.map((ct,i)=>{const dt=DT.filter(d=>d.da===ct.ma).reduce((s,d)=>s+d.gt,0);return{label:ct.ten.split(" ").slice(0,2).join(" "),value:dt,max:ct.hdTri,color:BC[i%BC.length]};});
+  const tblDA=DM_CT.map(ct=>{const dt=DT.filter(d=>d.da===ct.ma).reduce((s,d)=>s+d.gt,0);const cp=CP.filter(c=>c.da===ct.ma).reduce((s,c)=>s+c.ps,0);const ln=dt-cp;return{da:ct.ten,tt:ct.tt,dt:f(dt),cp:f(cp),ln:f(ln),mg:ps(ln,dt),pt:f(CN.filter(c=>c.loai==="PT"&&c.da===ct.ma).reduce((s,c)=>s+c.ps-c.daTT,0)),_c:{ln:ln>=0?T.gn:T.rd,mg:ln>=0?T.gn:T.rd,tt:ct.tt==="Hoàn thành"?T.gn:T.am}};});
+  return (<div>
+    <FilterRow>
+      <DateRange label="Thời gian:" from={dateFrom} to={dateTo} onFrom={setDateFrom} onTo={setDateTo}/>
+      <MultiSelect label="Khách hàng:" options={[...DM_KH,...DM_NCC].map(k=>({label:k.ten,value:k.ma}))} selected={khSel} onChange={setKhSel} w={170}/>
+      <MultiSelect label="Công trình:" options={DM_CT.map(c=>({label:c.ten,value:c.ma}))} selected={daSel} onChange={setDaSel} w={180}/>
+    </FilterRow>
+    <div style={{display:"flex",flexWrap:"wrap",gap:9,marginBottom:11}}>
+      <KPI label="Doanh thu" value={f(tongDT)} color={T.bl}/><KPI label="Chi phí" value={f(cpAll+CPVP_total)} color={T.rd}/>
+      <KPI label="Lợi nhuận ròng" value={f(loiNhuan)} color={loiNhuan>=0?T.gn:T.rd} accent={loiNhuan>=0?T.gn:T.rd} sub={`Margin ${ps(loiNhuan,tongDT)}`}/>
+      <KPI label="Dòng tiền thuần" value={f(tThu-tChi)} color={tThu-tChi>=0?T.gn:T.rd} accent={tThu-tChi>=0?T.gn:T.rd}/>
+      <div style={{background:T.card,borderRadius:10,padding:"13px 15px",border:"1px solid "+T.bdr,flex:"1 1 155px",minWidth:150,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:marginPct>=0?T.gn:T.rd}}/>
+        <div style={{fontSize:10,color:T.txD,marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>Margin toàn công ty</div>
+        <div style={{fontSize:19,fontWeight:700,color:T.tx,fontFamily:"'DM Mono',monospace"}}>{marginPct.toFixed(1)}%</div>
+        <div style={{height:6,background:"rgba(255,255,255,0.06)",borderRadius:3,marginTop:5,overflow:"hidden"}}>
+          <div style={{width:Math.max(marginPct,0)+"%",height:"100%",background:marginPct>=0?T.gn:T.rd,borderRadius:3}}/>
+        </div>
+        <div style={{fontSize:8.5,color:T.txD,marginTop:3}}>LN {f(loiNhuan)} / DT {f(tongDT)}</div>
+      </div>
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:11,marginBottom:11}}>
+      <Box title="Doanh thu lũy kế"><AreaChart data={dtCum} color={T.bl} w={220} h={135}/></Box>
+      <Box title="Doanh thu vs Chi phí"><GroupedBar data={gbData} w={220} h={135}/></Box>
+      <Box title="Dòng tiền theo tháng">
+        <StackedBar data={cfByMonth} h={135} w={220}/>
+        <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:4,fontSize:8}}>
+          <span style={{color:T.gn}}>■ Thu</span><span style={{color:T.rd}}>■ Chi</span>
+        </div>
+      </Box>
+      <Box title="Tiến độ nghiệm thu / HĐ">
+        {ntData.map(d=><ProgressBar key={d.label} label={d.label} value={d.value} max={d.max} color={d.color}/>)}
+      </Box>
+    </div>
+    <Box title="Tổng hợp dự án">
+      <Tbl cols={[{l:"Công trình",k:"da"},{l:"Trạng thái",k:"tt"},{l:"Doanh thu",k:"dt",a:"right",m:1},{l:"Chi phí",k:"cp",a:"right",m:1},{l:"Lợi nhuận",k:"ln",a:"right",m:1},{l:"Margin",k:"mg",a:"right",m:1},{l:"Công nợ",k:"pt",a:"right",m:1}]} rows={tblDA}/>
+    </Box>
+  </div>);
+};
+
+// ═══════════════════════════════════════
+// PAGE 2: DOANH THU
+// ═══════════════════════════════════════
+const P2=()=>{
+  const [dateFrom,setDateFrom]=useState("01/01/2026");
+  const [dateTo,setDateTo]=useState("26/05/2026");
+  const [khSel,setKhSel]=useState([]);
+  const [da,setDa]=useState("ALL");
+  const dtF=DT.filter(d=>inD(d.da,da)&&inDateRange(d.ng,dateFrom,dateTo));
+  const tongDT=dtF.reduce((s,d)=>s+d.gt,0);
+  const tongHD=(da==="ALL"?DM_CT:DM_CT.filter(c=>c.ma===da)).reduce((s,c)=>s+c.hdTri,0);
+  const ntPct=tongHD>0?pv(tongDT,tongHD):0;
+  const dtByM=MONTHS.map(m=>({l:"T"+m.slice(0,2),v:dtF.filter(d=>gM(d.ng)===m).reduce((s,d)=>s+d.gt,0)}));
+  const dtByCT=DM_CT.map(ct=>({l:ct.ten.split(" ").slice(0,2).join(" "),v:DT.filter(d=>d.da===ct.ma&&inDateRange(d.ng,dateFrom,dateTo)).reduce((s,d)=>s+d.gt,0)})).filter(d=>d.v>0).sort((a,b)=>b.v-a.v);
+  const tblDT=dtF.map(d=>({ng:d.ng,ct:d.ct,da:d.ten||gCT(d.da)?.ten,dt:f(d.gt)}));
+  return (<div>
+    <FilterRow>
+      <DateRange label="Thời gian:" from={dateFrom} to={dateTo} onFrom={setDateFrom} onTo={setDateTo}/>
+      <MultiSelect label="Khách hàng:" options={[...DM_KH,...DM_NCC].map(k=>({label:k.ten,value:k.ma}))} selected={khSel} onChange={setKhSel} w={170}/>
+      <Select label="Công trình:" value={da} onChange={setDa} options={[{label:"Tất cả",value:"ALL"},...DM_CT.map(c=>({label:c.ten,value:c.ma}))]} w={210}/>
+    </FilterRow>
+    <div style={{display:"flex",flexWrap:"wrap",gap:9,marginBottom:11}}>
+      <KPI label="DT Nghiệm thu" value={f(tongDT)} color={T.bl}/><KPI label="GT Hợp đồng" value={f(tongHD)} color={T.pr}/>
+      <KPI label="Tỷ lệ NT/HĐ" value={ps(tongDT,tongHD)} color={T.cy}/><KPI label="Số đợt NT" value={dtF.length+" đợt"} color={T.am}/>
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+      <Box title="Doanh thu theo tháng"><AreaChart data={dtByM} color={T.bl} w={250} fill={true}/></Box>
+      <Box title="Tỷ trọng theo công trình"><Donut data={dtByCT} size={145}/></Box>
+      <Box title="Tiến độ nghiệm thu / HĐ"><Gauge value={ntPct} max={100} label="Nghiệm thu / Hợp đồng" color={T.cy} size={130}/>
+        <div style={{marginTop:8}}>{DM_CT.filter(c=>da==="ALL"||c.ma===da).map(ct=>{const dt=DT.filter(d=>d.da===ct.ma).reduce((s,d)=>s+d.gt,0);return <ProgressBar key={ct.ma} label={ct.ten.split(" ").slice(0,2).join(" ")} value={dt} max={ct.hdTri} color={BC[DM_CT.indexOf(ct)%BC.length]}/>;})}</div>
+      </Box>
+    </div>
+    <Box title="Bảng kê doanh thu — M1">
+      <Tbl cols={[{l:"Ngày",k:"ng"},{l:"Số c.từ",k:"ct"},{l:"Công trình",k:"da"},{l:"Doanh thu",k:"dt",a:"right",m:1}]} rows={tblDT} maxH={400}/>
+    </Box>
+  </div>);
+};
+
+// ═══════════════════════════════════════
+// PAGE 3: CÔNG NỢ — Full redesign
+// Filters: Loại, KH (multi), CT (multi), Date range, Trạng thái
+// ═══════════════════════════════════════
+
+// Multi-select checkbox dropdown
+const MultiSelect=({label,options,selected,onChange,w=200})=>{
+  const [open,setOpen]=useState(false);
+  const allSel=selected.length===0;
+  const toggle=v=>{if(selected.includes(v))onChange(selected.filter(x=>x!==v));else onChange([...selected,v]);};
+  const display=allSel?"Tất cả":selected.length===1?(options.find(o=>o.value===selected[0])||{}).label||selected[0]:selected.length+" đã chọn";
+  return(
+    <div style={{display:"flex",alignItems:"center",gap:5,position:"relative"}}>
+      <span style={{fontSize:10,color:T.txM,fontWeight:600,textTransform:"uppercase",letterSpacing:.6,whiteSpace:"nowrap"}}>{label}</span>
+      <div onClick={()=>setOpen(!open)} style={{background:T.alt,border:"1px solid "+T.bdr,borderRadius:6,padding:"5px 8px",color:T.tx,fontSize:11,fontWeight:500,cursor:"pointer",minWidth:w,userSelect:"none",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{display}</span>
+        <span style={{fontSize:8,marginLeft:4}}>{open?"▲":"▼"}</span>
+      </div>
+      {open&&<div style={{position:"absolute",top:"100%",left:0,marginTop:2,background:T.card,border:"1px solid "+T.bdr,borderRadius:8,padding:6,zIndex:20,minWidth:w+40,maxHeight:200,overflowY:"auto",boxShadow:"0 8px 24px rgba(0,0,0,.5)"}}>
+        <div onClick={()=>{onChange([]);setOpen(false);}} style={{padding:"5px 8px",fontSize:10.5,color:allSel?T.bl:T.txD,cursor:"pointer",borderRadius:4,background:allSel?T.blG:"transparent",marginBottom:2}}>
+          {allSel?"✓ ":""}Tất cả
+        </div>
+        {options.map(o=>{
+          const s=selected.includes(o.value);
+          return <div key={o.value} onClick={()=>toggle(o.value)} style={{padding:"5px 8px",fontSize:10.5,color:s?T.bl:T.tx,cursor:"pointer",borderRadius:4,background:s?T.blG:"transparent"}}>
+            {s?"✓ ":"   "}{o.label}
+          </div>;
+        })}
+      </div>}
+    </div>
+  );
+};
+
+// Date range picker
+const DateRange=({label,from,to,onFrom,onTo})=>{
+  // from/to = "dd/mm/yyyy", internal = "yyyy-mm-dd"
+  const toISO=v=>{if(!v||v.length!==10)return"";const p=v.split("/");return p[2]+"-"+p[1]+"-"+p[0];};
+  const fromISO=v=>{if(!v)return"";const p=v.split("-");return p[2]+"/"+p[1]+"/"+p[0];};
+  return(
+    <div style={{display:"flex",alignItems:"center",gap:5}}>
+      <span style={{fontSize:10,color:T.txM,fontWeight:600,textTransform:"uppercase",letterSpacing:.6,whiteSpace:"nowrap"}}>{label}</span>
+      <input type="date" value={toISO(from)} onChange={e=>onFrom(fromISO(e.target.value))} style={{background:T.alt,border:"1px solid "+T.bdr,borderRadius:6,padding:"4px 6px",color:T.tx,fontSize:11,outline:"none"}}/>
+      <span style={{color:T.txM,fontSize:10}}>→</span>
+      <input type="date" value={toISO(to)} onChange={e=>onTo(fromISO(e.target.value))} style={{background:T.alt,border:"1px solid "+T.bdr,borderRadius:6,padding:"4px 6px",color:T.tx,fontSize:11,outline:"none"}}/>
+    </div>
+  );
+};
+
+const P3=()=>{
+  const parseD=s=>{const p=s.split("/");return new Date(+p[2],+p[1]-1,+p[0]);};
+
+  const [loai,setLoai]=useState("ALL");
+  const [khSel,setKhSel]=useState([]);
+  const [daSel,setDaSel]=useState([]);
+  const [dateFrom,setDateFrom]=useState("01/01/2026");
+  const [dateTo,setDateTo]=useState("26/05/2026");
+
+  // Enrich — chỉ tính conLai, không có hạn/trạng thái
+  const enriched=useMemo(()=>CN.map(c=>{
+    const conLai=c.ps-c.daTT;
+    const ngDate=parseD(c.ng);
+    return {...c,conLai,ngDate};
+  }),[]);
+
+  // Filter
+  const filtered=useMemo(()=>{
+    return enriched.filter(c=>{
+      if(loai!=="ALL"&&c.loai!==loai)return false;
+      if(khSel.length>0&&!khSel.includes(c.kh))return false;
+      if(daSel.length>0&&!daSel.includes(c.da))return false;
+      if(!inDateRange(c.ng,dateFrom,dateTo))return false;
+      return true;
+    });
+  },[loai,khSel,daSel,dateFrom,dateTo,enriched]);
+
+  // KPIs
+  const tongPS=filtered.reduce((s,c)=>s+c.ps,0);
+  const tongDaTT=filtered.reduce((s,c)=>s+c.daTT,0);
+  const netCN=tongPS-tongDaTT;
+  const hieuQua=tongPS>0?pv(tongDaTT,tongPS):0;
+
+  // Options
+  const dtOptions=useMemo(()=>{
+    const list=[];
+    if(loai!=="PTr")DM_KH.forEach(k=>list.push({label:k.ten,value:k.ma}));
+    if(loai!=="PT")DM_NCC.forEach(n=>list.push({label:n.ten,value:n.ma}));
+    return list;
+  },[loai]);
+
+  const getName=(l,ma)=>l==="PT"?(DM_KH.find(k=>k.ma===ma)||{}).ten||ma:(DM_NCC.find(n=>n.ma===ma)||{}).ten||ma;
+
+  // Net công nợ theo NGÀY
+  const netByDay=useMemo(()=>{
+    const map={};
+    filtered.forEach(c=>{
+      if(!map[c.ng]) map[c.ng]={ng:c.ng,pt:0,ptr:0};
+      if(c.loai==="PT") map[c.ng].pt+=c.conLai;
+      else map[c.ng].ptr+=c.conLai;
+    });
+    return Object.values(map).sort((a,b)=>parseD(a.ng)-parseD(b.ng));
+  },[filtered]);
+
+  // Lũy kế công nợ theo NGÀY
+  const cumByDay=useMemo(()=>{
+    const sorted=[...filtered].sort((a,b)=>a.ngDate-b.ngDate);
+    const map={};
+    let cum=0;
+    sorted.forEach(c=>{
+      cum+=c.ps-c.daTT;
+      map[c.ng]=cum;
+    });
+    return Object.entries(map).map(([ng,v])=>({l:ng.slice(0,5),v}));
+  },[filtered]);
+
+  // Donut theo đối tượng
+  const byDT={};
+  filtered.forEach(c=>{const n=getName(c.loai,c.kh);byDT[n]=(byDT[n]||0)+c.conLai;});
+  const dtDonut=Object.entries(byDT).map(([l,v])=>({l,v})).filter(d=>d.v>0).sort((a,b)=>b.v-a.v);
+
+  // TH theo CT
+  const thCT=useMemo(()=>DM_CT.map(ct=>{
+    const items=filtered.filter(c=>c.da===ct.ma);
+    const ptPS=items.filter(c=>c.loai==="PT").reduce((s,c)=>s+c.ps,0);
+    const ptTT=items.filter(c=>c.loai==="PT").reduce((s,c)=>s+c.daTT,0);
+    const ptrPS=items.filter(c=>c.loai==="PTr").reduce((s,c)=>s+c.ps,0);
+    const ptrTT=items.filter(c=>c.loai==="PTr").reduce((s,c)=>s+c.daTT,0);
+    const net=(ptPS-ptTT)-(ptrPS-ptrTT);
+    if(ptPS===0&&ptrPS===0) return null;
+    return {ct:ct.ten,ptPS:f(ptPS),ptTT:f(ptTT),ptCon:f(ptPS-ptTT),ptrPS:f(ptrPS),ptrTT:f(ptrTT),ptrCon:f(ptrPS-ptrTT),net:f(net),
+      _c:{ptCon:ptPS-ptTT>0?T.am:T.gn,ptrCon:ptrPS-ptrTT>0?T.pr:T.gn,net:net>=0?T.gn:T.rd}};
+  }).filter(Boolean),[filtered]);
+
+  // Detail rows — không có hạn TT, trạng thái
+  const detailRows=filtered.map(c=>{
+    const ct=gCT(c.da);
+    return {ng:c.ng,soCT:c.ct,doiTuong:getName(c.loai,c.kh),
+      congTrinh:ct?ct.ten.split(" ").slice(0,3).join(" "):"",
+      loaiTag:c.loai==="PT"?"Thu":"Trả",dg:c.dg,
+      ps:f(c.ps),daTT:f(c.daTT),conLai:f(c.conLai),
+      _c:{loaiTag:c.loai==="PT"?T.am:T.pr,conLai:c.conLai>0?T.am:T.gn}};
+  });
+
+  return (<div>
+    <FilterRow>
+      <DateRange label="Thời gian:" from={dateFrom} to={dateTo} onFrom={setDateFrom} onTo={setDateTo}/>
+      <MultiSelect label="Khách hàng:" options={dtOptions} selected={khSel} onChange={setKhSel} w={155}/>
+      <MultiSelect label="Công trình:" options={DM_CT.map(c=>({label:c.ten,value:c.ma}))} selected={daSel} onChange={setDaSel} w={155}/>
+      <Select label="Loại:" value={loai} onChange={v=>{setLoai(v);setKhSel([]);}} options={[{label:"Tất cả",value:"ALL"},{label:"Phải thu",value:"PT"},{label:"Phải trả",value:"PTr"}]} w={110}/>
+    </FilterRow>
+
+    <div style={{display:"flex",flexWrap:"wrap",gap:9,marginBottom:11}}>
+      <KPI label="Công nợ phát sinh" value={f(tongPS)} color={T.bl} sub={filtered.length+" khoản"}/>
+      <KPI label="Đã xử lý" value={f(tongDaTT)} color={T.gn} sub="Đã thu / đã trả"/>
+      <KPI label="Net công nợ" value={f(netCN)} color={T.am} sub="Còn phải thu/trả"/>
+      <div style={{background:T.card,borderRadius:10,padding:"13px 15px",border:"1px solid "+T.bdr,flex:"1 1 170px",minWidth:165,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:hieuQua>70?T.gn:hieuQua>40?T.am:T.rd}}/>
+        <div style={{fontSize:10,color:T.txD,marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>Tỷ lệ xử lý</div>
+        <div style={{fontSize:19,fontWeight:700,color:T.tx,fontFamily:"'DM Mono',monospace"}}>{hieuQua.toFixed(1)}%</div>
+        <div style={{height:6,background:"rgba(255,255,255,0.06)",borderRadius:3,marginTop:5,overflow:"hidden"}}>
+          <div style={{width:hieuQua+"%",height:"100%",background:hieuQua>70?T.gn:hieuQua>40?T.am:T.rd,borderRadius:3}}/>
+        </div>
+        <div style={{fontSize:8.5,color:T.txD,marginTop:3}}>Đã TT {f(tongDaTT)} / PS {f(tongPS)}</div>
+      </div>
+    </div>
+
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:11}}>
+      <Box title="Công nợ còn lại theo đối tượng"><Donut data={dtDonut} size={140}/></Box>
+      <Box title="Công nợ lũy kế theo ngày">
+        {cumByDay.length>1 ? <AreaChart data={cumByDay} color={T.am} w={Math.max(cumByDay.length*25+40,200)} h={150}/>
+        : <div style={{color:T.txM,fontSize:11,padding:20,textAlign:"center"}}>Cần ít nhất 2 ngày dữ liệu</div>}
+      </Box>
+    </div>
+
+    <div style={{display:"grid",gridTemplateColumns:"1fr",gap:11,marginBottom:11}}>
+      <Box title="Net công nợ theo ngày (Phải thu vs Phải trả)">
+        {netByDay.length>0 ? (()=>{
+          const vw=Math.max(netByDay.length*32+50,220);
+          const mx=Math.max(...netByDay.map(x=>x.pt+x.ptr),1);
+          return <svg width="100%" viewBox={"0 0 "+vw+" 165"} style={{overflow:"visible"}}>
+            {netByDay.map((d,i)=>{
+              const bw=18, gap=netByDay.length>1?(vw-40)/netByDay.length:32;
+              const x=25+i*gap;
+              const hPT=Math.max((d.pt/mx)*110,2);
+              const hPTr=Math.max((d.ptr/mx)*110,2);
+              return <g key={i}>
+                <rect x={x} y={130-hPT-hPTr} width={bw} height={hPTr} rx={3} fill={T.rd} opacity={.8}/>
+                <rect x={x} y={130-hPT} width={bw} height={hPT} rx={3} fill={T.am} opacity={.85}/>
+                <text x={x+bw/2} y={148} textAnchor="middle" fill={T.txD} fontSize={6.5} transform={"rotate(-35,"+(x+bw/2)+",148)"}>{d.ng}</text>
+              </g>;
+            })}
+            <g transform="translate(10,5)">
+              <rect width={7} height={7} rx={2} fill={T.am}/><text x={10} y={7} fill={T.txD} fontSize={7}>Phải thu còn</text>
+              <rect y={12} width={7} height={7} rx={2} fill={T.rd}/><text x={10} y={19} fill={T.txD} fontSize={7}>Phải trả còn</text>
+            </g>
+          </svg>;
+        })() : <div style={{color:T.txM,fontSize:11,padding:20,textAlign:"center"}}>Không có dữ liệu</div>}
+      </Box>
+    </div>
+
+    <Box title="Tổng hợp công nợ theo công trình">
+      <Tbl cols={[
+        {l:"Công trình",k:"ct"},
+        {l:"Phải thu",k:"ptPS",a:"right",m:1},{l:"Đã thu",k:"ptTT",a:"right",m:1},{l:"Còn P.Thu",k:"ptCon",a:"right",m:1},
+        {l:"Phải trả",k:"ptrPS",a:"right",m:1},{l:"Đã trả",k:"ptrTT",a:"right",m:1},{l:"Còn P.Trả",k:"ptrCon",a:"right",m:1},
+        {l:"Net",k:"net",a:"right",m:1},
+      ]} rows={thCT} maxH={280}/>
+    </Box>
+
+    <Box title="Chi tiết công nợ phát sinh theo ngày">
+      <Tbl cols={[
+        {l:"Ngày PS",k:"ng"},{l:"Số CT",k:"soCT"},{l:"Khách hàng",k:"doiTuong"},{l:"Công trình",k:"congTrinh"},
+        {l:"Loại",k:"loaiTag"},{l:"Nội dung",k:"dg"},
+        {l:"Phát sinh",k:"ps",a:"right",m:1},{l:"Đã TT",k:"daTT",a:"right",m:1},{l:"Còn lại",k:"conLai",a:"right",m:1},
+      ]} rows={detailRows} maxH={500}/>
+    </Box>
+  </div>);
+};
+
+// ═══════════════════════════════════════
+// PAGE 4: CHI PHÍ
+// ═══════════════════════════════════════
+const P4=()=>{
+  const [khSel,setKhSel]=useState([]);
+  const [dateFrom,setDateFrom]=useState("01/01/2026");
+  const [dateTo,setDateTo]=useState("26/05/2026");
+  const [daSel,setDaSel]=useState([]);
+
+  // Filter CP
+  const cpF=daSel.length===0?CP:CP.filter(c=>daSel.includes(c.da));
+  const tongCPTT=cpF.reduce((s,c)=>s+c.ps,0);
+
+  // Khấu hao 5 tháng
+  const tsF=daSel.length===0?TSCD:TSCD.filter(t=>daSel.includes(t.da));
+  const khByCT={};
+  TSCD.forEach(t=>{khByCT[t.da]=(khByCT[t.da]||0)+t.ngGia/t.thKH*5;});
+  const tongKH=tsF.reduce((s,t)=>s+t.ngGia/t.thKH*5,0);
+  const tongCPDA=tongCPTT+tongKH;
+
+  // Cơ cấu CP theo nhóm (gồm KH)
+  const byNhom={};
+  cpF.forEach(c=>{const k=c.maCP;byNhom[k]=byNhom[k]||{ten:{CPNVL:"NVL",CPMTC:"Máy TC",CPNC:"Nhân công",TP:"Thầu phụ"}[k]||k,ps:0};byNhom[k].ps+=c.ps;});
+  if(tongKH>0) byNhom["CPKH"]={ten:"Khấu hao TB",ps:tongKH};
+  const nhomDonut=Object.entries(byNhom).map(([k,v])=>({l:v.ten,v:v.ps})).filter(d=>d.v>0).sort((a,b)=>b.v-a.v);
+
+  // CP theo CT (grouped bar)
+  const cpCTBar=DM_CT.map(ct=>{
+    const tt=CP.filter(c=>c.da===ct.ma).reduce((s,c)=>s+c.ps,0);
+    const kh=khByCT[ct.ma]||0;
+    return {l:ct.ten.split(" ").slice(0,2).join(" "),a:tt,b:kh};
+  }).filter(d=>d.a>0||d.b>0);
+
+  // Bảng tổng hợp mới: STT, CT, Mã phí, Tên CP, Số dư ĐK, PS trong kỳ, Số dư CK, Ghi chú
+  const tblCP=useMemo(()=>{
+    let stt=0;
+    const rows=[];
+    DM_CT.forEach(ct=>{
+      const items=CP.filter(c=>c.da===ct.ma);
+      if(items.length===0) return;
+      items.forEach(c=>{
+        stt++;
+        rows.push({stt,ct:ct.ten,maCP:c.maCP,tenCP:{CPNVL:"CP Nguyên vật liệu",CPMTC:"CP Máy thi công",CPNC:"CP Nhân công",TP:"Thầu phụ"}[c.maCP]||c.maCP,
+          soDuDK:f(0),psKy:f(c.ps),soDuCK:f(c.ps),ghiChu:""});
+      });
+      // Thêm dòng khấu hao
+      const kh=khByCT[ct.ma]||0;
+      if(kh>0){stt++;rows.push({stt,ct:ct.ten,maCP:"CPKH",tenCP:"Khấu hao thiết bị",soDuDK:f(0),psKy:f(kh),soDuCK:f(kh),ghiChu:"Phân bổ 5 tháng"});}
+    });
+    return rows;
+  },[cpF]);
+
+  // VP data
+  const cpVPDonut=Object.entries(CPVP).map(([k,v])=>({l:{luong:"Lương",bhxh:"BHXH",thue:"Thuê VP",dien:"Điện nước",vpp:"VPP",hc:"Hành chính",ql:"Quản lý"}[k],v}));
+  const vpByMonth=MONTHS.map(m=>({l:"T"+m.slice(0,2),v:CPVP_total/5}));
+
+  return (<div>
+    <FilterRow>
+      <DateRange label="Thời gian:" from={dateFrom} to={dateTo} onFrom={setDateFrom} onTo={setDateTo}/>
+      <MultiSelect label="Khách hàng:" options={[...DM_KH,...DM_NCC].map(k=>({label:k.ten,value:k.ma}))} selected={khSel} onChange={setKhSel} w={170}/>
+      <MultiSelect label="Công trình:" options={DM_CT.map(c=>({label:c.ten,value:c.ma}))} selected={daSel} onChange={setDaSel} w={200}/>
+    </FilterRow>
+
+    {/* ── TỔNG QUAN CHI PHÍ ── */}
+    <div style={{display:"flex",flexWrap:"wrap",gap:9,marginBottom:11}}>
+      <KPI label="CP Trực tiếp" value={f(tongCPTT)} color={T.rd} sub="NVL + MTC + NC + TP"/>
+      <KPI label="Khấu hao TB" value={f(tongKH)} color={T.pr} sub="5 tháng phân bổ"/>
+      <KPI label="Tổng CP Dự án" value={f(tongCPDA)} color={T.or}/>
+      <KPI label="CP Văn phòng" value={f(CPVP_total)} color={T.am} sub="Cấp công ty"/>
+      <KPI label="Tổng chi phí" value={f(tongCPDA+CPVP_total)} color={"#c0392b"}/>
+    </div>
+
+    {/* ═══ KHỐI 1: CHI PHÍ DỰ ÁN ═══ */}
+    <div style={{fontSize:13,fontWeight:700,color:T.tx,marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
+      <div style={{width:4,height:16,background:T.or,borderRadius:2}}/>Chi phí dự án / công trình
+    </div>
+
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+      <Box title="Cơ cấu chi phí dự án"><Donut data={nhomDonut} size={130}/></Box>
+      <Box title="CP Trực tiếp vs Khấu hao theo công trình">
+        <GroupedBar data={cpCTBar} h={140} w={250} lA="CP Trực tiếp" lB="Khấu hao TB"/>
+      </Box>
+      <Box title="Chi tiết khấu hao TB phân bổ">
+        <Tbl cols={[
+          {l:"Tên TB",k:"ten"},{l:"NG",k:"ngGia",a:"right",m:1},
+          {l:"KH/th",k:"khThang",a:"right",m:1},{l:"KH 5th",k:"kh5",a:"right",m:1},{l:"CT",k:"da"},
+        ]} rows={tsF.map(t=>({
+          ten:t.ten,ngGia:f(t.ngGia),khThang:f(t.ngGia/t.thKH),kh5:f(t.ngGia/t.thKH*5),
+          da:gCT(t.da)?gCT(t.da).ten.split(" ").slice(0,2).join(" "):"",
+        }))} maxH={200}/>
+      </Box>
+    </div>
+
+    <Box title="Tổng hợp chi phí dự án">
+      <Tbl cols={[
+        {l:"STT",k:"stt",a:"center"},{l:"Công trình",k:"ct"},{l:"Mã phí",k:"maCP"},
+        {l:"Tên chi phí",k:"tenCP"},
+        {l:"Số dư ĐK",k:"soDuDK",a:"right",m:1},{l:"PS trong kỳ",k:"psKy",a:"right",m:1},
+        {l:"Số dư CK",k:"soDuCK",a:"right",m:1},{l:"Ghi chú",k:"ghiChu"},
+      ]} rows={tblCP} maxH={350}/>
+    </Box>
+
+    {/* ═══ KHỐI 2: CHI PHÍ VĂN PHÒNG ═══ */}
+    <div style={{fontSize:13,fontWeight:700,color:T.tx,marginTop:16,marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
+      <div style={{width:4,height:16,background:T.pr,borderRadius:2}}/>Chi phí văn phòng
+    </div>
+
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+      <Box title="Cơ cấu CP văn phòng"><Donut data={cpVPDonut} size={125}/></Box>
+      <Box title="CP VP theo tháng"><AreaChart data={vpByMonth} color={T.pr} w={240} h={125}/></Box>
+      <Box title="Bảng chi tiết CP văn phòng">
+        <Tbl cols={[
+          {l:"Nhóm chi phí",k:"nhom"},
+          {l:"TB/Th",k:"thang",a:"right",m:1},{l:"Lũy kế",k:"ky",a:"right",m:1},
+          {l:"%",k:"tyTrong",a:"right",m:1},
+        ]} rows={Object.entries(CPVP).map(([k,v])=>({
+          nhom:{luong:"Lương NV",bhxh:"BHXH/PL",thue:"Thuê VP",dien:"Điện nước",vpp:"VPP",hc:"Hành chính",ql:"Quản lý"}[k],
+          thang:f(v/5),ky:f(v),tyTrong:ps(v,CPVP_total),
+        }))} maxH={200}/>
+      </Box>
+    </div>
+  </div>);
+};
+
+// ═══════════════════════════════════════
+const P5=()=>{
+  const [dateFrom,setDateFrom]=useState("01/01/2026");
+  const [dateTo,setDateTo]=useState("26/05/2026");
+  const [khSel,setKhSel]=useState([]);
+  const [da,setDa]=useState("ALL");
+  const [quy,setQuy]=useState("ALL");
+  const tnF=TN.filter(t=>inD(t.da||"",da)&&inDateRange(t.ng,dateFrom,dateTo)&&(quy==="ALL"||t.loaiQ===quy));
+  const soDuDau=3500;
+  const tThu=tnF.reduce((s,t)=>s+t.thu,0), tChi=tnF.reduce((s,t)=>s+t.chi,0);
+  const soDuCuoi=soDuDau+tThu-tChi;
+  const dtAll=DT.reduce((s,d)=>s+d.gt,0);
+  const byMonth=MONTHS.map(m=>{const d=tnF.filter(t=>gM(t.ng)===m);return{l:"T"+m.slice(0,2),thu:d.reduce((s,t)=>s+t.thu,0),chi:d.reduce((s,t)=>s+t.chi,0)};});
+  const byCT={};tnF.forEach(t=>{const n=gCT(t.da)?.ten?.split(" ").slice(0,2).join(" ")||(t.da?"Khác":"VP Cty");byCT[n]=byCT[n]||{thu:0,chi:0};byCT[n].thu+=t.thu;byCT[n].chi+=t.chi;});
+  const cfCTData=Object.entries(byCT).map(([l,v])=>({l,v:v.thu-v.chi})).sort((a,b)=>b.v-a.v);
+  // Cumulative cash flow line
+  const cumCF=byMonth.reduce((acc,m)=>{const last=acc.length?acc[acc.length-1].v:soDuDau;acc.push({l:m.l,v:last+m.thu-m.chi});return acc;},[]);
+  const rowsThu=tnF.filter(t=>t.thu>0).map(t=>({ng:t.ng,ct:t.ctThu,dt:gCT(t.da)?.cdt||gCT(t.da)?.ten||"—",dg:t.dg,tm:t.loaiQ==="TM"?f(t.thu):"",nh:t.loaiQ==="NH"?f(t.thu):"",tong:f(t.thu)}));
+  const rowsChi=tnF.filter(t=>t.chi>0).map(t=>({ng:t.ng,ct:t.ctChi,dt:gCT(t.da)?.ten?.split(" ").slice(0,3).join(" ")||"VP Cty",dg:t.dg,tm:t.loaiQ==="TM"?f(t.chi):"",nh:t.loaiQ==="NH"?f(t.chi):"",tong:f(t.chi)}));
+  return (<div>
+    <FilterRow>
+      <DateRange label="Thời gian:" from={dateFrom} to={dateTo} onFrom={setDateFrom} onTo={setDateTo}/>
+      <MultiSelect label="Khách hàng:" options={[...DM_KH,...DM_NCC].map(k=>({label:k.ten,value:k.ma}))} selected={khSel} onChange={setKhSel} w={170}/>
+      <Select label="Công trình:" value={da} onChange={setDa} options={[{label:"Tất cả",value:"ALL"},...DM_CT.map(c=>({label:c.ten,value:c.ma}))]} w={180}/>
+      <Select label="Quỹ:" value={quy} onChange={setQuy} options={[{label:"TM+NH",value:"ALL"},{label:"Tiền mặt",value:"TM"},{label:"Ngân hàng",value:"NH"}]} w={120}/>
+    </FilterRow>
+    <div style={{display:"flex",flexWrap:"wrap",gap:9,marginBottom:11}}>
+      <KPI label="Đầu kỳ" value={f(soDuDau)} color={T.bl}/><KPI label="Tổng thu" value={f(tThu)} color={T.gn}/>
+      <KPI label="Tổng chi" value={f(tChi)} color={T.rd}/><KPI label="Thuần" value={f(tThu-tChi)} color={tThu-tChi>=0?T.gn:T.rd} accent={tThu-tChi>=0?T.gn:T.rd}/>
+      <KPI label="Cuối kỳ" value={f(soDuCuoi)} color={T.cy}/><KPI label="Thu/DT" value={ps(tThu,dtAll)} color={T.am}/>
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+      <Box title="Số dư cuối kỳ lũy kế"><AreaChart data={cumCF} color={T.cy} w={250} h={140}/></Box>
+      <Box title="Thu vs Chi theo tháng"><StackedBar data={byMonth.map(m=>({l:m.l,a:m.thu,b:m.chi}))} w={250} h={140}/></Box>
+      <Box title="Dòng tiền theo công trình"><HBar data={cfCTData}/></Box>
+    </div>
+    <Box title="Nhật ký thu tiền">
+      <Tbl cols={[{l:"Ngày",k:"ng"},{l:"CT",k:"ct"},{l:"Khách hàng",k:"dt"},{l:"Diễn giải",k:"dg"},{l:"TM",k:"tm",a:"right",m:1},{l:"NH",k:"nh",a:"right",m:1},{l:"Tổng",k:"tong",a:"right",m:1}]} rows={rowsThu} maxH={240}/>
+    </Box>
+    <Box title="Nhật ký chi tiền">
+      <Tbl cols={[{l:"Ngày",k:"ng"},{l:"CT",k:"ct"},{l:"Khách hàng",k:"dt"},{l:"Diễn giải",k:"dg"},{l:"TM",k:"tm",a:"right",m:1},{l:"NH",k:"nh",a:"right",m:1},{l:"Tổng",k:"tong",a:"right",m:1}]} rows={rowsChi} maxH={240}/>
+    </Box>
+  </div>);
+};
+
+// ═══════════════════════════════════════
+// PAGE 6: HÀNG KHO — NXT, Tồn kho, Bảng kê Nhập/Xuất
+// ═══════════════════════════════════════
+const P6=()=>{
+  const parseD=s=>{const p=s.split("/");return new Date(+p[2],+p[1]-1,+p[0]);};
+
+  const [nccSel,setNccSel]=useState([]);
+  const [daSel,setDaSel]=useState([]);
+  const [dateFrom,setDateFrom]=useState("01/01/2026");
+  const [dateTo,setDateTo]=useState("26/05/2026");
+
+  // Filter
+  const khoF=useMemo(()=>{
+    const fd=new Date(dateFrom),td=new Date(dateTo);
+    return KHO.filter(k=>{
+      if(nccSel.length>0&&!nccSel.includes(k.ncc)) return false;
+      if(daSel.length>0&&!daSel.includes(k.da)) return false;
+      const d=parseD(k.ng);
+      if(d<fd||d>td) return false;
+      return true;
+    });
+  },[nccSel,daSel,dateFrom,dateTo]);
+
+  // KPIs
+  const soVT=khoF.length;
+  const tongNhapSL=khoF.reduce((s,k)=>s+k.nhapSL,0);
+  const tongNhapTT=khoF.reduce((s,k)=>s+k.nhapSL*k.nhapGia,0);
+  const tongXuatSL=khoF.reduce((s,k)=>s+k.xuatSL,0);
+  const tongXuatTT=khoF.reduce((s,k)=>s+k.xuatSL*k.nhapGia,0);
+  const tongTonSL=khoF.reduce((s,k)=>s+k.tonDau+k.nhapSL-k.xuatSL,0);
+  const tongTonTT=khoF.reduce((s,k)=>s+(k.tonDau+k.nhapSL-k.xuatSL)*k.nhapGia,0);
+  // Chênh lệch kiểm kê (demo: giả lập 2% hao hụt)
+  const chenhLechSL=Math.round(tongTonSL*0.02);
+  const chenhLechTT=tongTonTT*0.02;
+  // Thiết bị
+  const soTB=TSCD.length;
+  const soHD=TSCD.filter(t=>t.tt==="Hoạt động").length;
+  const tongNgGia=TSCD.reduce((s,t)=>s+t.ngGia,0);
+  const tyLeHD=soTB>0?pv(soHD,soTB):0;
+
+  // Nhập-Xuất-Tồn theo tháng (line chart)
+  const nxtByMonth=MONTHS.map(m=>{
+    const mi=khoF.filter(k=>gM(k.ng)===m);
+    return {
+      l:"T"+m.slice(0,2),
+      nhap:mi.reduce((s,k)=>s+k.nhapSL*k.nhapGia,0),
+      xuat:mi.reduce((s,k)=>s+k.xuatSL*k.nhapGia,0),
+    };
+  });
+  // tính tồn lũy kế
+  const nxtCum=nxtByMonth.reduce((acc,m)=>{
+    const last=acc.length?acc[acc.length-1].ton:khoF.reduce((s,k)=>s+k.tonDau*k.nhapGia,0);
+    acc.push({...m,ton:last+m.nhap-m.xuat});
+    return acc;
+  },[]);
+
+  // Giá trị xuất kho theo CT (bar chart)
+  const xuatByCT={};
+  khoF.forEach(k=>{
+    const ct=gCT(k.da);
+    const n=ct?ct.ten.split(" ").slice(0,2).join(" "):k.da;
+    xuatByCT[n]=(xuatByCT[n]||0)+k.xuatSL*k.nhapGia;
+  });
+  const xuatCTData=Object.entries(xuatByCT).map(([l,v])=>({l,v})).sort((a,b)=>b.v-a.v);
+
+  // NXT table rows
+  const nxtRows=khoF.map((k,i)=>{
+    const tc=k.tonDau+k.nhapSL-k.xuatSL;
+    return {
+      stt:i+1,maVT:k.maVT,ten:k.ten,dvt:k.dvt,
+      tonDau:fn(k.tonDau),
+      nhapSL:fn(k.nhapSL),nhapTT:f(k.nhapSL*k.nhapGia),
+      xuatSL:fn(k.xuatSL),xuatTT:f(k.xuatSL*k.nhapGia),
+      tonCuoi:fn(tc),gtTon:f(tc*k.nhapGia),
+      _c:{tonCuoi:tc>0?T.gn:tc<0?T.rd:T.txD}
+    };
+  });
+
+  return (<div>
+    <FilterRow>
+      <DateRange label="Thời gian:" from={dateFrom} to={dateTo} onFrom={setDateFrom} onTo={setDateTo}/>
+      <MultiSelect label="Khách hàng:" options={DM_NCC.map(n=>({label:n.ten,value:n.ma}))} selected={nccSel} onChange={setNccSel} w={170}/>
+      <MultiSelect label="Công trình:" options={DM_CT.map(c=>({label:c.ten,value:c.ma}))} selected={daSel} onChange={setDaSel} w={170}/>
+    </FilterRow>
+
+    <div style={{display:"flex",flexWrap:"wrap",gap:9,marginBottom:11}}>
+      <KPI label="Tổng thiết bị" value={soTB+" TB"} color={T.bl} sub={f(tongNgGia)+" nguyên giá"}/>
+      <KPI label="Tổng nhập kho" value={fn(tongNhapSL)+" SL"} color={T.gn} sub={f(tongNhapTT)+" giá trị"}/>
+      <KPI label="Tổng xuất kho" value={fn(tongXuatSL)+" SL"} color={T.or} sub={f(tongXuatTT)+" giá trị"}/>
+      <KPI label="Tồn kho cuối kỳ" value={fn(tongTonSL)+" SL"} color={T.cy} sub={f(tongTonTT)+" giá trị"}/>
+      <KPI label="Chênh lệch kiểm kê" value={fn(chenhLechSL)+" SL"} color={T.rd} sub={f(chenhLechTT)+" hao hụt (~2%)"}/>
+      <div style={{background:T.card,borderRadius:10,padding:"13px 15px",border:"1px solid "+T.bdr,flex:"1 1 155px",minWidth:150,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:tyLeHD>80?T.gn:tyLeHD>50?T.am:T.rd}}/>
+        <div style={{fontSize:10,color:T.txD,marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>TB hoạt động</div>
+        <div style={{fontSize:19,fontWeight:700,color:T.tx,fontFamily:"'DM Mono',monospace"}}>{tyLeHD.toFixed(0)}%</div>
+        <div style={{height:6,background:"rgba(255,255,255,0.06)",borderRadius:3,marginTop:5,overflow:"hidden"}}>
+          <div style={{width:tyLeHD+"%",height:"100%",background:tyLeHD>80?T.gn:tyLeHD>50?T.am:T.rd,borderRadius:3}}/>
+        </div>
+        <div style={{fontSize:8.5,color:T.txD,marginTop:3}}>{soHD} hoạt động / {soTB} tổng</div>
+      </div>
+    </div>
+
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:11}}>
+      <Box title="Nhập — Xuất — Tồn theo tháng">
+        <svg width="100%" viewBox="0 0 340 170" style={{overflow:"visible"}}>
+          {/* Grid lines */}
+          {[0,.25,.5,.75,1].map((r,i)=><line key={i} x1={30} y1={15+r*120} x2={320} y2={15+r*120} stroke={T.bdr} strokeWidth=".5" strokeDasharray={r>0&&r<1?"3,3":"0"}/>)}
+          {(()=>{
+            const mx=Math.max(...nxtCum.flatMap(m=>[m.nhap,m.xuat,m.ton]),1);
+            const pts=n=>nxtCum.map((m,i)=>({x:50+i*65,y:15+120-((m[n]/mx)*120)}));
+            const line=n=>pts(n).map((p,i)=>(i===0?"M":"L")+p.x+","+p.y).join(" ");
+            return <>
+              <path d={line("nhap")} fill="none" stroke={T.gn} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"/>
+              <path d={line("xuat")} fill="none" stroke={T.rd} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"/>
+              <path d={line("ton")} fill="none" stroke={T.cy} strokeWidth={2.5} strokeDasharray="6,3" strokeLinecap="round" strokeLinejoin="round"/>
+              {pts("nhap").map((p,i)=><circle key={"n"+i} cx={p.x} cy={p.y} r={3} fill={T.gn}/>)}
+              {pts("xuat").map((p,i)=><circle key={"x"+i} cx={p.x} cy={p.y} r={3} fill={T.rd}/>)}
+              {pts("ton").map((p,i)=><circle key={"t"+i} cx={p.x} cy={p.y} r={3} fill={T.cy}/>)}
+              {nxtCum.map((m,i)=><text key={i} x={50+i*65} y={150} textAnchor="middle" fill={T.txD} fontSize={9}>{m.l}</text>)}
+            </>;
+          })()}
+          <g transform="translate(30,3)">
+            <line x1={0} y1={4} x2={12} y2={4} stroke={T.gn} strokeWidth={2}/><text x={15} y={7} fill={T.txD} fontSize={7.5}>Nhập</text>
+            <line x1={45} y1={4} x2={57} y2={4} stroke={T.rd} strokeWidth={2}/><text x={60} y={7} fill={T.txD} fontSize={7.5}>Xuất</text>
+            <line x1={85} y1={4} x2={97} y2={4} stroke={T.cy} strokeWidth={2} strokeDasharray="4,2"/><text x={100} y={7} fill={T.txD} fontSize={7.5}>Tồn</text>
+          </g>
+        </svg>
+      </Box>
+      <Box title="Giá trị xuất kho theo công trình">
+        <HBar data={xuatCTData}/>
+        <div style={{fontSize:9,color:T.txM,marginTop:6,padding:"5px 0",borderTop:"1px solid rgba(34,45,66,0.12)"}}>
+          Cầu nối sang trang Chi phí dự án — vật tư xuất cho CT nào nhiều nhất
+        </div>
+      </Box>
+    </div>
+
+    <Box title="Bảng Nhập — Xuất — Tồn theo vật tư">
+      <Tbl cols={[
+        {l:"STT",k:"stt",a:"center"},{l:"Mã VT",k:"maVT"},{l:"Tên vật tư",k:"ten"},{l:"ĐVT",k:"dvt"},
+        {l:"Đầu kỳ",k:"tonDau",a:"right",m:1},
+        {l:"SL Nhập",k:"nhapSL",a:"right",m:1},{l:"GT Nhập",k:"nhapTT",a:"right",m:1},
+        {l:"SL Xuất",k:"xuatSL",a:"right",m:1},{l:"GT Xuất",k:"xuatTT",a:"right",m:1},
+        {l:"Tồn CK",k:"tonCuoi",a:"right",m:1},{l:"GT Tồn",k:"gtTon",a:"right",m:1},
+      ]} rows={nxtRows} maxH={500}/>
+    </Box>
+  </div>);
+};
+
+// ═══════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════
+const pages=[{id:0,label:"Tổng quan",icon:"◈",comp:P1},{id:1,label:"Doanh thu",icon:"▲",comp:P2},{id:2,label:"Chi phí",icon:"▤",comp:P4},{id:3,label:"Công nợ",icon:"◎",comp:P3},{id:4,label:"Dòng tiền",icon:"◆",comp:P5},{id:5,label:"Hàng kho",icon:"▦",comp:P6}];
+
+export default function App(){
+  const [act,setAct]=useState(0);
+  const Comp=pages[act].comp;
+  return (
+    <div style={{minHeight:"100vh",background:T.bg,color:T.tx,fontFamily:"'Inter',-apple-system,sans-serif"}}>
+      <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+      <div style={{background:"linear-gradient(135deg,#0C1220,#151D2E)",borderBottom:`1px solid ${T.bdr}`,padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <div style={{width:34,height:34,borderRadius:8,background:"linear-gradient(135deg,#4A90E2,#9B59B6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:800,color:"#fff"}}>EC</div>
+          <div><div style={{fontSize:14,fontWeight:700,letterSpacing:.3}}>ECV CORP</div><div style={{fontSize:8.5,color:T.txM,letterSpacing:1,textTransform:"uppercase"}}>Báo cáo Tài chính Dự án · Power BI</div></div>
+        </div>
+        <div style={{fontSize:10,color:T.txD,textAlign:"right"}}><div>01/01/2026 → 26/05/2026</div><div style={{color:T.txM}}>Demo · ĐVT: Triệu đồng</div></div>
+      </div>
+      <div style={{display:"flex",gap:1,padding:"5px 18px",background:T.pnl,borderBottom:`1px solid ${T.bdr}`,overflowX:"auto"}}>
+        {pages.map(pg=>(<button key={pg.id} onClick={()=>setAct(pg.id)} style={{padding:"8px 13px",borderRadius:6,border:"none",cursor:"pointer",background:act===pg.id?T.blG:"transparent",borderBottom:act===pg.id?`2px solid ${T.bl}`:"2px solid transparent",color:act===pg.id?T.bl:T.txD,fontWeight:act===pg.id?700:500,fontSize:11.5,whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}><span style={{fontSize:12}}>{pg.icon}</span> {pg.label}</button>))}
+      </div>
+      <div style={{padding:"12px 18px 26px",minHeight:"calc(100vh - 120px)"}}><Comp/></div>
+    </div>
+  );
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(App));
+  </script>
+</body>
+</html>
