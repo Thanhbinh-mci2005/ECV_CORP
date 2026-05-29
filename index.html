@@ -6,14 +6,14 @@
   <title>ECV Corp — Báo cáo Tài chính Dự án</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0A0D14; color: #E4EAF4; font-family: 'Inter', -apple-system, sans-serif; }
+    body { background: #F4F6FA; color: #1A2230; font-family: 'Inter', -apple-system, sans-serif; }
     #root { min-height: 100vh; }
     select { -webkit-appearance: auto; appearance: auto; }
-    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
+    input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.55; cursor: pointer; }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.04); }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
     table { font-variant-numeric: tabular-nums; }
   </style>
 </head>
@@ -179,8 +179,8 @@ const parseDate=s=>{if(!s)return new Date(0);if(s.includes("-")){return new Date
 const inDateRange=(ng,from,to)=>{const d=parseDate(ng),fd=parseDate(from),td=parseDate(to);return d>=fd&&d<=td;};
 
 // ─── DESIGN ───
-const T={bg:"#0A0D14",pnl:"#0F1219",card:"#151B28",alt:"#1A2235",bdr:"#222D42",tx:"#E4EAF4",txD:"#7A869C",txM:"#515E74",bl:"#4A90E2",blG:"rgba(74,144,226,0.12)",gn:"#2ECC71",rd:"#E74C3C",am:"#F39C12",pr:"#9B59B6",cy:"#1ABC9C",or:"#E67E22"};
-const BC=["#4A90E2","#2ECC71","#F39C12","#E74C3C","#9B59B6","#1ABC9C","#E67E22","#3498DB"];
+const T={bg:"#F4F6FA",pnl:"#FFFFFF",card:"#FFFFFF",alt:"#F0F3F8",bdr:"#DDE3EE",tx:"#1A2230",txD:"#5A6678",txM:"#8A95A8",bl:"#2F80ED",blG:"rgba(47,128,237,0.10)",gn:"#27AE60",rd:"#E74C3C",am:"#E08600",pr:"#8E44AD",cy:"#0E9E87",or:"#E67E22"};
+const BC=["#2F80ED","#27AE60","#E08600","#E74C3C","#8E44AD","#0E9E87","#E67E22","#2D74C9"];
 
 // ═══════════════════════════════════════
 // CHART COMPONENTS
@@ -321,7 +321,7 @@ const ProgressBar=({label,value,max,color=T.bl,sub})=>{
         <span style={{color:T.txD}}>{label}</span>
         <span style={{color:T.tx,fontFamily:"'DM Mono',monospace"}}>{f(value)} / {f(max)} <span style={{color:color}}>({pct.toFixed(1)}%)</span></span>
       </div>
-      <div style={{height:10,background:"rgba(255,255,255,0.04)",borderRadius:5,overflow:"hidden"}}>
+      <div style={{height:10,background:"rgba(0,0,0,0.07)",borderRadius:5,overflow:"hidden"}}>
         <div style={{width:`${pct}%`,height:"100%",background:`linear-gradient(90deg,${color},${color}88)`,borderRadius:5}}/>
       </div>
       {sub&&<div style={{fontSize:8.5,color:T.txM,marginTop:2}}>{sub}</div>}
@@ -362,10 +362,10 @@ const Tbl=({cols,rows,maxH=340})=>{
     <div style={{overflowX:"auto",overflowY:"auto",maxHeight:maxH,borderRadius:8,border:`1px solid ${T.bdr}`}}>
       <table style={{width:"100%",borderCollapse:"collapse",fontSize:11.5}}>
         <thead><tr>{cols.map((c,i)=>(
-          <th key={i} style={{padding:"8px 10px",background:"#131825",color:T.txD,fontWeight:600,textAlign:c.a||"left",whiteSpace:"nowrap",borderBottom:`1px solid ${T.bdr}`,position:"sticky",top:0,zIndex:2,fontSize:10,textTransform:"uppercase",letterSpacing:.4}}>{c.l}</th>
+          <th key={i} style={{padding:"8px 10px",background:"#EEF2F8",color:T.txD,fontWeight:600,textAlign:c.a||"left",whiteSpace:"nowrap",borderBottom:`1px solid ${T.bdr}`,position:"sticky",top:0,zIndex:2,fontSize:10,textTransform:"uppercase",letterSpacing:.4}}>{c.l}</th>
         ))}</tr></thead>
         <tbody>{rows.map((r,ri)=>(
-          <tr key={ri} style={{background:ri%2===0?"transparent":"rgba(255,255,255,0.015)"}}>
+          <tr key={ri} style={{background:ri%2===0?"transparent":"rgba(0,0,0,0.03)"}}>
             {cols.map((c,ci)=>{
               const cellColor = r._c && r._c[c.k] ? r._c[c.k] : T.tx;
               return(
@@ -378,7 +378,7 @@ const Tbl=({cols,rows,maxH=340})=>{
     </div>
   );
 };
-const HBar=({data})=>data.map((d,i)=>{const mx=Math.max(...data.map(x=>x.v),1);return(<div key={i} style={{display:"flex",alignItems:"center",marginBottom:5,gap:5}}><div style={{width:90,fontSize:10,color:T.txD,textAlign:"right",flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{d.l}</div><div style={{flex:1,height:15,background:"rgba(255,255,255,0.025)",borderRadius:3,overflow:"hidden"}}><div style={{width:`${(d.v/mx)*100}%`,height:"100%",background:BC[i%BC.length],borderRadius:3}}/></div><div style={{width:62,fontSize:10,color:T.tx,fontFamily:"'DM Mono',monospace",textAlign:"right",flexShrink:0}}>{f(d.v)}</div></div>);});
+const HBar=({data})=>data.map((d,i)=>{const mx=Math.max(...data.map(x=>x.v),1);return(<div key={i} style={{display:"flex",alignItems:"center",marginBottom:5,gap:5}}><div style={{width:90,fontSize:10,color:T.txD,textAlign:"right",flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{d.l}</div><div style={{flex:1,height:15,background:"rgba(0,0,0,0.05)",borderRadius:3,overflow:"hidden"}}><div style={{width:`${(d.v/mx)*100}%`,height:"100%",background:BC[i%BC.length],borderRadius:3}}/></div><div style={{width:62,fontSize:10,color:T.tx,fontFamily:"'DM Mono',monospace",textAlign:"right",flexShrink:0}}>{f(d.v)}</div></div>);});
 const Box=({children,title})=>(<div style={{background:T.card,borderRadius:10,padding:15,border:`1px solid ${T.bdr}`,marginBottom:11}}>{title&&<div style={{fontSize:12.5,fontWeight:700,color:T.tx,marginBottom:10,display:"flex",alignItems:"center",gap:5}}><div style={{width:3,height:14,background:T.bl,borderRadius:2}}/>{title}</div>}{children}</div>);
 
 // Multi-select checkbox dropdown
@@ -394,7 +394,7 @@ const MultiSelect=({label,options,selected,onChange,w=200})=>{
         <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{display}</span>
         <span style={{fontSize:8,marginLeft:4}}>{open?"▲":"▼"}</span>
       </div>
-      {open&&<div style={{position:"absolute",top:"100%",left:0,marginTop:2,background:T.card,border:"1px solid "+T.bdr,borderRadius:8,padding:6,zIndex:20,minWidth:w+40,maxHeight:200,overflowY:"auto",boxShadow:"0 8px 24px rgba(0,0,0,.5)"}}>
+      {open&&<div style={{position:"absolute",top:"100%",left:0,marginTop:2,background:T.card,border:"1px solid "+T.bdr,borderRadius:8,padding:6,zIndex:20,minWidth:w+40,maxHeight:200,overflowY:"auto",boxShadow:"0 8px 24px rgba(0,0,0,.15)"}}>
         <div onClick={()=>{onChange([]);setOpen(false);}} style={{padding:"5px 8px",fontSize:10.5,color:allSel?T.bl:T.txD,cursor:"pointer",borderRadius:4,background:allSel?T.blG:"transparent",marginBottom:2}}>
           {allSel?"✓ ":""}Tất cả
         </div>
@@ -460,7 +460,7 @@ const P1=()=>{
         <div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:marginPct>=0?T.gn:T.rd}}/>
         <div style={{fontSize:10,color:T.txD,marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>Margin toàn công ty</div>
         <div style={{fontSize:19,fontWeight:700,color:T.tx,fontFamily:"'DM Mono',monospace"}}>{marginPct.toFixed(1)}%</div>
-        <div style={{height:6,background:"rgba(255,255,255,0.06)",borderRadius:3,marginTop:5,overflow:"hidden"}}>
+        <div style={{height:6,background:"rgba(0,0,0,0.08)",borderRadius:3,marginTop:5,overflow:"hidden"}}>
           <div style={{width:Math.max(marginPct,0)+"%",height:"100%",background:marginPct>=0?T.gn:T.rd,borderRadius:3}}/>
         </div>
         <div style={{fontSize:8.5,color:T.txD,marginTop:3}}>LN {f(loiNhuan)} / DT {f(tongDT)}</div>
@@ -627,7 +627,7 @@ const P3=()=>{
         <div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:hieuQua>70?T.gn:hieuQua>40?T.am:T.rd}}/>
         <div style={{fontSize:10,color:T.txD,marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>Tỷ lệ xử lý</div>
         <div style={{fontSize:19,fontWeight:700,color:T.tx,fontFamily:"'DM Mono',monospace"}}>{hieuQua.toFixed(1)}%</div>
-        <div style={{height:6,background:"rgba(255,255,255,0.06)",borderRadius:3,marginTop:5,overflow:"hidden"}}>
+        <div style={{height:6,background:"rgba(0,0,0,0.08)",borderRadius:3,marginTop:5,overflow:"hidden"}}>
           <div style={{width:hieuQua+"%",height:"100%",background:hieuQua>70?T.gn:hieuQua>40?T.am:T.rd,borderRadius:3}}/>
         </div>
         <div style={{fontSize:8.5,color:T.txD,marginTop:3}}>Đã TT {f(tongDaTT)} / PS {f(tongPS)}</div>
@@ -934,7 +934,7 @@ const P6=()=>{
         <div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:tyLeHD>80?T.gn:tyLeHD>50?T.am:T.rd}}/>
         <div style={{fontSize:10,color:T.txD,marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>TB hoạt động</div>
         <div style={{fontSize:19,fontWeight:700,color:T.tx,fontFamily:"'DM Mono',monospace"}}>{tyLeHD.toFixed(0)}%</div>
-        <div style={{height:6,background:"rgba(255,255,255,0.06)",borderRadius:3,marginTop:5,overflow:"hidden"}}>
+        <div style={{height:6,background:"rgba(0,0,0,0.08)",borderRadius:3,marginTop:5,overflow:"hidden"}}>
           <div style={{width:tyLeHD+"%",height:"100%",background:tyLeHD>80?T.gn:tyLeHD>50?T.am:T.rd,borderRadius:3}}/>
         </div>
         <div style={{fontSize:8.5,color:T.txD,marginTop:3}}>{soHD} hoạt động / {soTB} tổng</div>
@@ -997,7 +997,7 @@ function App(){
   return (
     <div style={{minHeight:"100vh",background:T.bg,color:T.tx,fontFamily:"'Inter',-apple-system,sans-serif"}}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-      <div style={{background:"linear-gradient(135deg,#0C1220,#151D2E)",borderBottom:`1px solid ${T.bdr}`,padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      <div style={{background:"linear-gradient(135deg,#FFFFFF,#EDF2FA)",borderBottom:`1px solid ${T.bdr}`,padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <div style={{width:34,height:34,borderRadius:8,background:"linear-gradient(135deg,#4A90E2,#9B59B6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:800,color:"#fff"}}>EC</div>
           <div><div style={{fontSize:14,fontWeight:700,letterSpacing:.3}}>ECV CORP</div><div style={{fontSize:8.5,color:T.txM,letterSpacing:1,textTransform:"uppercase"}}>Báo cáo Tài chính Dự án · Power BI</div></div>
