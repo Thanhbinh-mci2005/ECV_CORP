@@ -383,7 +383,7 @@ const Tbl=({cols,rows,maxH=340})=>{
   );
 };
 const HBar=({data})=>data.map((d,i)=>{const mx=Math.max(...data.map(x=>x.v),1);return(<div key={i} style={{display:"flex",alignItems:"center",marginBottom:5,gap:5}}><div style={{width:90,fontSize:10,color:T.txD,textAlign:"right",flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{d.l}</div><div style={{flex:1,height:15,background:"rgba(0,0,0,0.05)",borderRadius:3,overflow:"hidden"}}><div style={{width:`${(d.v/mx)*100}%`,height:"100%",background:BC[i%BC.length],borderRadius:3}}/></div><div style={{width:62,fontSize:10,color:T.tx,fontFamily:"'DM Mono',monospace",textAlign:"right",flexShrink:0}}>{f(d.v)}</div></div>);});
-const Box=({children,title})=>(<div style={{background:T.card,borderRadius:10,padding:15,border:`1px solid ${T.bdr}`,marginBottom:11}}>{title&&<div style={{fontSize:12.5,fontWeight:700,color:T.tx,marginBottom:10,display:"flex",alignItems:"center",gap:5}}><div style={{width:3,height:14,background:T.bl,borderRadius:2}}/>{title}</div>}{children}</div>);
+const Box=({children,title})=>(<div style={{background:T.card,borderRadius:10,padding:15,border:`1px solid ${T.bdr}`,marginBottom:11,display:"flex",flexDirection:"column"}}>{title&&<div style={{fontSize:12.5,fontWeight:700,color:T.tx,marginBottom:10,display:"flex",alignItems:"center",gap:5}}><div style={{width:3,height:14,background:T.bl,borderRadius:2}}/>{title}</div>}<div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",minHeight:0}}>{children}</div></div>);
 
 // Multi-select checkbox dropdown
 const MultiSelect=({label,options,selected,onChange,w=200})=>{
@@ -470,7 +470,7 @@ const P1=()=>{
         <div style={{fontSize:8.5,color:T.txD,marginTop:3}}>LN {f(loiNhuan)} / DT {f(tongDT)}</div>
       </div>
     </div>
-    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:11,marginBottom:11}}>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:11,marginBottom:11}}>
       <Box title="Doanh thu lũy kế"><AreaChart data={dtCum} color={T.bl} w={220} h={135}/></Box>
       <Box title="Doanh thu vs Chi phí"><GroupedBar data={gbData} w={220} h={135}/></Box>
       <Box title="Dòng tiền theo tháng">
@@ -511,7 +511,7 @@ const P2=()=>{
       <KPI label="DT Nghiệm thu" value={f(tongDT)} color={T.bl}/><KPI label="GT Hợp đồng" value={f(tongHD)} color={T.pr}/>
       <KPI label="Tỷ lệ NT/HĐ" value={ps(tongDT,tongHD)} color={T.cy}/><KPI label="Số đợt NT" value={dtF.length+" đợt"} color={T.am}/>
     </div>
-    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
       <Box title="Doanh thu theo tháng"><AreaChart data={dtByM} color={T.bl} w={250} fill={true}/></Box>
       <Box title="Tỷ trọng theo công trình"><Donut data={dtByCT} size={170}/></Box>
       <Box title="Tiến độ nghiệm thu / HĐ"><Gauge value={ntPct} max={100} label="Nghiệm thu / Hợp đồng" color={T.cy} size={130}/>
@@ -635,7 +635,7 @@ const P3=()=>{
       </div>
     </div>
 
-    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
       <Box title="Công nợ còn lại theo đối tượng"><Donut data={dtDonut} size={155}/></Box>
       <Box title="Công nợ lũy kế theo ngày">
         {cumByDay.length>1 ? <AreaChart data={cumByDay} color={T.am} w={Math.max(cumByDay.length*25+40,200)} h={150}/>
@@ -753,7 +753,7 @@ const P4=()=>{
       <div style={{width:4,height:16,background:T.or,borderRadius:2}}/>Chi phí dự án / công trình
     </div>
 
-    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
       <Box title="Cơ cấu chi phí dự án"><Donut data={nhomDonut} size={155}/></Box>
       <Box title="CP Trực tiếp vs Khấu hao theo công trình">
         <GroupedBar data={cpCTBar} h={140} w={250} lA="CP Trực tiếp" lB="Khấu hao TB"/>
@@ -782,7 +782,7 @@ const P4=()=>{
       <div style={{width:4,height:16,background:T.pr,borderRadius:2}}/>Chi phí văn phòng
     </div>
 
-    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
       <Box title="Cơ cấu CP văn phòng"><Donut data={cpVPDonut} size={150}/></Box>
       <Box title="CP VP theo tháng"><AreaChart data={vpByMonth} color={T.pr} w={240} h={125}/></Box>
       <Box title="Bảng chi tiết CP văn phòng">
@@ -831,7 +831,7 @@ const P5=()=>{
       <KPI label="Tổng chi" value={f(tChi)} color={T.rd}/><KPI label="Thuần" value={f(tThu-tChi)} color={tThu-tChi>=0?T.gn:T.rd} accent={tThu-tChi>=0?T.gn:T.rd}/>
       <KPI label="Cuối kỳ" value={f(soDuCuoi)} color={T.cy}/><KPI label="Thu/DT" value={ps(tThu,dtAll)} color={T.am}/>
     </div>
-    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
       <Box title="Số dư cuối kỳ lũy kế"><AreaChart data={cumCF} color={T.cy} w={250} h={140}/></Box>
       <Box title="Thu vs Chi theo tháng"><StackedBar data={byMonth.map(m=>({l:m.l,a:m.thu,b:m.chi}))} w={250} h={140}/></Box>
       <Box title="Dòng tiền theo công trình"><HBar data={cfCTData}/></Box>
@@ -939,7 +939,7 @@ const P6=()=>{
       </div>
     </div>
 
-    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:11}}>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:11}}>
       <Box title="Nhập — Xuất — Tồn theo tháng">
         <svg width="100%" viewBox="0 0 340 170" style={{overflow:"visible",display:"block",maxWidth:420,margin:"0 auto"}}>
           {[0,.25,.5,.75,1].map((r,i)=><line key={i} x1={30} y1={15+r*120} x2={320} y2={15+r*120} stroke={T.bdr} strokeWidth=".5" strokeDasharray={r>0&&r<1?"3,3":"0"}/>)}
