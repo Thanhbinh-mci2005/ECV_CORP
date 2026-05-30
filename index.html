@@ -204,7 +204,7 @@ const Donut=({data,size=160,hole=0.6,showLegend=true})=>{
     return <path key={i} d={path} fill={BC[i%BC.length]} opacity={.9}/>;
   });
   return (
-    <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:14,flexWrap:"wrap"}}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {arcs}
         <text x={r} y={r-6} textAnchor="middle" fill={T.tx} fontSize={16} fontWeight={700} fontFamily="'DM Mono',monospace">{f(total)}</text>
@@ -287,29 +287,31 @@ const Gauge=({value,max=100,label,color=T.bl,size=120})=>{
   );
 };
 
-const StackedBar=({data,h=150,w=320})=>{
+const StackedBar=({data,h=150,w=320,lA="Thu",lB="Chi",cA=T.gn,cB=T.rd})=>{
   const mx=Math.max(...data.map(d=>d.a+d.b),1);
   const pad={t:16,b:24,l:8,r:8};
   const cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
   const bw=cw/data.length*.55;
   return (
-    <svg width="100%" viewBox={`0 0 ${w} ${h}`}>
+    <div>
+    <svg width="100%" viewBox={`0 0 ${w} ${h}`} style={{display:"block"}}>
       {data.map((d,i)=>{
         const x=pad.l+i*(cw/data.length)+(cw/data.length-bw)/2;
         const ha=(d.a/mx)*ch, hb=(d.b/mx)*ch;
         return <g key={i}>
-          <rect x={x} y={pad.t+ch-ha-hb} width={bw} height={ha} rx={3} fill={T.gn} opacity={.85}/>
-          <rect x={x} y={pad.t+ch-hb} width={bw} height={hb} rx={3} fill={T.rd} opacity={.75}/>
+          <rect x={x} y={pad.t+ch-ha-hb} width={bw} height={ha} rx={3} fill={cA} opacity={.85}/>
+          <rect x={x} y={pad.t+ch-hb} width={bw} height={hb} rx={3} fill={cB} opacity={.75}/>
           {ha>15&&<text x={x+bw/2} y={pad.t+ch-hb-ha/2+4} textAnchor="middle" fill="#fff" fontSize={7.5} fontFamily="'DM Mono',monospace">{f(d.a)}</text>}
           {hb>15&&<text x={x+bw/2} y={pad.t+ch-hb/2+4} textAnchor="middle" fill="#fff" fontSize={7.5} fontFamily="'DM Mono',monospace">{f(d.b)}</text>}
           <text x={x+bw/2} y={h-6} textAnchor="middle" fill={T.txD} fontSize={8}>{d.l}</text>
         </g>;
       })}
-      <g transform={`translate(${w-70},${pad.t})`}>
-        <rect width={7} height={7} rx={2} fill={T.gn}/><text x={10} y={7} fill={T.txD} fontSize={7.5}>Thu</text>
-        <rect y={12} width={7} height={7} rx={2} fill={T.rd}/><text x={10} y={19} fill={T.txD} fontSize={7.5}>Chi</text>
-      </g>
     </svg>
+    <div style={{display:"flex",gap:16,justifyContent:"center",marginTop:6,fontSize:10}}>
+      <span style={{display:"flex",alignItems:"center",gap:5,color:T.txD}}><span style={{width:9,height:9,borderRadius:2,background:cA,display:"inline-block"}}/>{lA}</span>
+      <span style={{display:"flex",alignItems:"center",gap:5,color:T.txD}}><span style={{width:9,height:9,borderRadius:2,background:cB,display:"inline-block"}}/>{lB}</span>
+    </div>
+    </div>
   );
 };
 
@@ -335,7 +337,8 @@ const GroupedBar=({data,h=155,w=340,lA="Doanh thu",lB="Chi phí",cA=T.bl,cB=T.or
   const cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
   const gw=cw/data.length, bw=gw*.32;
   return (
-    <svg width="100%" viewBox={`0 0 ${w} ${h}`}>
+    <div>
+    <svg width="100%" viewBox={`0 0 ${w} ${h}`} style={{display:"block"}}>
       {data.map((d,i)=>{
         const gx=pad.l+i*gw;
         const ha=(d.a/mx)*ch, hb=(d.b/mx)*ch;
@@ -345,11 +348,12 @@ const GroupedBar=({data,h=155,w=340,lA="Doanh thu",lB="Chi phí",cA=T.bl,cB=T.or
           <text x={gx+gw/2} y={h-6} textAnchor="middle" fill={T.txD} fontSize={7.5}>{d.l}</text>
         </g>;
       })}
-      <g transform={`translate(${w-90},${pad.t})`}>
-        <rect width={7} height={7} rx={2} fill={cA}/><text x={10} y={7} fill={T.txD} fontSize={7.5}>{lA}</text>
-        <rect y={12} width={7} height={7} rx={2} fill={cB}/><text x={10} y={19} fill={T.txD} fontSize={7.5}>{lB}</text>
-      </g>
     </svg>
+    <div style={{display:"flex",gap:16,justifyContent:"center",marginTop:6,fontSize:10}}>
+      <span style={{display:"flex",alignItems:"center",gap:5,color:T.txD}}><span style={{width:9,height:9,borderRadius:2,background:cA,display:"inline-block"}}/>{lA}</span>
+      <span style={{display:"flex",alignItems:"center",gap:5,color:T.txD}}><span style={{width:9,height:9,borderRadius:2,background:cB,display:"inline-block"}}/>{lB}</span>
+    </div>
+    </div>
   );
 };
 
@@ -466,14 +470,11 @@ const P1=()=>{
         <div style={{fontSize:8.5,color:T.txD,marginTop:3}}>LN {f(loiNhuan)} / DT {f(tongDT)}</div>
       </div>
     </div>
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:11,marginBottom:11}}>
+    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:11,marginBottom:11}}>
       <Box title="Doanh thu lũy kế"><AreaChart data={dtCum} color={T.bl} w={220} h={135}/></Box>
       <Box title="Doanh thu vs Chi phí"><GroupedBar data={gbData} w={220} h={135}/></Box>
       <Box title="Dòng tiền theo tháng">
         <StackedBar data={cfByMonth} h={135} w={220}/>
-        <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:4,fontSize:8}}>
-          <span style={{color:T.gn}}>■ Thu</span><span style={{color:T.rd}}>■ Chi</span>
-        </div>
       </Box>
       <Box title="Tiến độ nghiệm thu / HĐ">
         {ntData.map(d=><ProgressBar key={d.label} label={d.label} value={d.value} max={d.max} color={d.color}/>)}
@@ -510,9 +511,9 @@ const P2=()=>{
       <KPI label="DT Nghiệm thu" value={f(tongDT)} color={T.bl}/><KPI label="GT Hợp đồng" value={f(tongHD)} color={T.pr}/>
       <KPI label="Tỷ lệ NT/HĐ" value={ps(tongDT,tongHD)} color={T.cy}/><KPI label="Số đợt NT" value={dtF.length+" đợt"} color={T.am}/>
     </div>
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
       <Box title="Doanh thu theo tháng"><AreaChart data={dtByM} color={T.bl} w={250} fill={true}/></Box>
-      <Box title="Tỷ trọng theo công trình"><Donut data={dtByCT} size={145}/></Box>
+      <Box title="Tỷ trọng theo công trình"><Donut data={dtByCT} size={170}/></Box>
       <Box title="Tiến độ nghiệm thu / HĐ"><Gauge value={ntPct} max={100} label="Nghiệm thu / Hợp đồng" color={T.cy} size={130}/>
         <div style={{marginTop:8}}>{DM_CT.filter(c=>da==="ALL"||c.ma===da).map(ct=>{const dt=DT.filter(d=>d.da===ct.ma).reduce((s,d)=>s+d.gt,0);return <ProgressBar key={ct.ma} label={ct.ten.split(" ").slice(0,2).join(" ")} value={dt} max={ct.hdTri} color={BC[DM_CT.indexOf(ct)%BC.length]}/>;})}</div>
       </Box>
@@ -634,15 +635,12 @@ const P3=()=>{
       </div>
     </div>
 
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:11}}>
-      <Box title="Công nợ còn lại theo đối tượng"><Donut data={dtDonut} size={140}/></Box>
+    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+      <Box title="Công nợ còn lại theo đối tượng"><Donut data={dtDonut} size={155}/></Box>
       <Box title="Công nợ lũy kế theo ngày">
         {cumByDay.length>1 ? <AreaChart data={cumByDay} color={T.am} w={Math.max(cumByDay.length*25+40,200)} h={150}/>
         : <div style={{color:T.txM,fontSize:11,padding:20,textAlign:"center"}}>Cần ít nhất 2 ngày dữ liệu</div>}
       </Box>
-    </div>
-
-    <div style={{display:"grid",gridTemplateColumns:"1fr",gap:11,marginBottom:11}}>
       <Box title="Net công nợ theo ngày (Phải thu vs Phải trả)">
         {netByDay.length>0 ? (()=>{
           const vw=Math.max(netByDay.length*32+50,220);
@@ -755,8 +753,8 @@ const P4=()=>{
       <div style={{width:4,height:16,background:T.or,borderRadius:2}}/>Chi phí dự án / công trình
     </div>
 
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
-      <Box title="Cơ cấu chi phí dự án"><Donut data={nhomDonut} size={130}/></Box>
+    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+      <Box title="Cơ cấu chi phí dự án"><Donut data={nhomDonut} size={155}/></Box>
       <Box title="CP Trực tiếp vs Khấu hao theo công trình">
         <GroupedBar data={cpCTBar} h={140} w={250} lA="CP Trực tiếp" lB="Khấu hao TB"/>
       </Box>
@@ -784,8 +782,8 @@ const P4=()=>{
       <div style={{width:4,height:16,background:T.pr,borderRadius:2}}/>Chi phí văn phòng
     </div>
 
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
-      <Box title="Cơ cấu CP văn phòng"><Donut data={cpVPDonut} size={125}/></Box>
+    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+      <Box title="Cơ cấu CP văn phòng"><Donut data={cpVPDonut} size={150}/></Box>
       <Box title="CP VP theo tháng"><AreaChart data={vpByMonth} color={T.pr} w={240} h={125}/></Box>
       <Box title="Bảng chi tiết CP văn phòng">
         <Tbl cols={[
@@ -833,7 +831,7 @@ const P5=()=>{
       <KPI label="Tổng chi" value={f(tChi)} color={T.rd}/><KPI label="Thuần" value={f(tThu-tChi)} color={tThu-tChi>=0?T.gn:T.rd} accent={tThu-tChi>=0?T.gn:T.rd}/>
       <KPI label="Cuối kỳ" value={f(soDuCuoi)} color={T.cy}/><KPI label="Thu/DT" value={ps(tThu,dtAll)} color={T.am}/>
     </div>
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
+    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:11}}>
       <Box title="Số dư cuối kỳ lũy kế"><AreaChart data={cumCF} color={T.cy} w={250} h={140}/></Box>
       <Box title="Thu vs Chi theo tháng"><StackedBar data={byMonth.map(m=>({l:m.l,a:m.thu,b:m.chi}))} w={250} h={140}/></Box>
       <Box title="Dòng tiền theo công trình"><HBar data={cfCTData}/></Box>
@@ -941,9 +939,9 @@ const P6=()=>{
       </div>
     </div>
 
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:11}}>
+    <div style={{display:"grid",alignItems:"start",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:11}}>
       <Box title="Nhập — Xuất — Tồn theo tháng">
-        <svg width="100%" viewBox="0 0 340 170" style={{overflow:"visible"}}>
+        <svg width="100%" viewBox="0 0 340 170" style={{overflow:"visible",display:"block",maxWidth:420,margin:"0 auto"}}>
           {[0,.25,.5,.75,1].map((r,i)=><line key={i} x1={30} y1={15+r*120} x2={320} y2={15+r*120} stroke={T.bdr} strokeWidth=".5" strokeDasharray={r>0&&r<1?"3,3":"0"}/>)}
           {(()=>{
             const mx=Math.max(...nxtCum.flatMap(m=>[m.nhap,m.xuat,m.ton]),1);
