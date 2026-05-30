@@ -1,4 +1,29 @@
-import { useState, useMemo } from "react";
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECV Corp — Báo cáo Tài chính Dự án</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #F4F6FA; color: #1A2230; font-family: 'Inter', -apple-system, sans-serif; }
+    #root { min-height: 100vh; }
+    select { -webkit-appearance: auto; appearance: auto; }
+    input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.55; cursor: pointer; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.04); }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+    table { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
+  <script type="text/babel" data-presets="react">
+const { useState, useMemo } = React;
 
 // ═══════════════════════════════════════
 // ECV CORP — BÁO CÁO TÀI CHÍNH DỰ ÁN
@@ -36,7 +61,6 @@ const DT = [
   {ng:"20/05/2026",ct:"NT017",da:"CT04",ten:"Cao tốc BL-LT",gt:8100},
 ];
 const CN = [
-  // Phải thu — mỗi dòng = 1 khoản nợ phát sinh (nghiệm thu), có hạn TT + đã TT
   {id:1,loai:"PT",kh:"KH01",da:"CT01",ng:"15/01/2026",ct:"NT001",dg:"Nghiệm thu đợt 1",ps:3200,daTT:3200},
   {id:2,loai:"PT",kh:"KH02",da:"CT02",ng:"20/01/2026",ct:"NT002",dg:"Nghiệm thu đợt 1",ps:2100,daTT:2100},
   {id:3,loai:"PT",kh:"KH04",da:"CT04",ng:"25/01/2026",ct:"NT003",dg:"Nghiệm thu đợt 1",ps:5500,daTT:5000},
@@ -54,7 +78,6 @@ const CN = [
   {id:15,loai:"PT",kh:"KH01",da:"CT01",ng:"10/05/2026",ct:"NT015",dg:"Nghiệm thu đợt 5",ps:4800,daTT:0},
   {id:16,loai:"PT",kh:"KH02",da:"CT02",ng:"16/05/2026",ct:"NT016",dg:"Nghiệm thu đợt 4",ps:3900,daTT:0},
   {id:17,loai:"PT",kh:"KH04",da:"CT04",ng:"20/05/2026",ct:"NT017",dg:"Nghiệm thu đợt 4",ps:8100,daTT:0},
-  // Phải trả
   {id:21,loai:"PTr",kh:"NCC01",da:"CT01",ng:"15/01/2026",ct:"BN001",dg:"Nhập thép phi 16",ps:3500,daTT:2200},
   {id:22,loai:"PTr",kh:"NCC02",da:"CT02",ng:"20/01/2026",ct:"BN002",dg:"Nhập xi măng",ps:2800,daTT:1500},
   {id:23,loai:"PTr",kh:"NCC03",da:"CT04",ng:"10/02/2026",ct:"BN003",dg:"Nhập bê tông M300",ps:4200,daTT:4200},
@@ -108,7 +131,6 @@ const CP = [
 const CPVP = {luong:1850,bhxh:520,thue:280,dien:85,vpp:45,hc:120,ql:200};
 const CPVP_total = Object.values(CPVP).reduce((s,v)=>s+v,0);
 
-// HÀNG KHO (Mẫu biểu 3)
 const KHO = [
   {maVT:"VT01",ten:"Thép Phi 16",dvt:"Tấn",kho:"K01",da:"CT01",ncc:"NCC01",tonDau:50,nhapSL:120,nhapGia:18.5,xuatSL:95,ng:"15/01/2026"},
   {maVT:"VT02",ten:"Xi măng PCB40",dvt:"Tấn",kho:"K01",da:"CT02",ncc:"NCC02",tonDau:200,nhapSL:500,nhapGia:2.1,xuatSL:420,ng:"20/01/2026"},
@@ -120,7 +142,6 @@ const KHO = [
   {maVT:"VT08",ten:"Ván khuôn phủ phim",dvt:"m²",kho:"K02",da:"CT02",ncc:"NCC04",tonDau:500,nhapSL:300,nhapGia:0.28,xuatSL:600,ng:"05/04/2026"},
 ];
 
-// TÀI SẢN / CCDC (Mẫu biểu 4)
 const TSCD = [
   {ma:"TS01",loai:"Máy",ten:"Máy cẩu 50T",ngTang:"15/03/2023",ngGia:1200,thKH:60,da:"CT01",thoVH:"Nguyễn Văn A",tt:"Hoạt động"},
   {ma:"TS02",loai:"Máy",ten:"Máy đào PC200",ngTang:"01/06/2023",ngGia:900,thKH:60,da:"CT04",thoVH:"Trần Văn B",tt:"Hoạt động"},
@@ -162,10 +183,9 @@ const T={bg:"#F4F6FA",pnl:"#FFFFFF",card:"#FFFFFF",alt:"#F0F3F8",bdr:"#DDE3EE",t
 const BC=["#2F80ED","#27AE60","#E08600","#E74C3C","#8E44AD","#0E9E87","#E67E22","#2D74C9"];
 
 // ═══════════════════════════════════════
-// CHART COMPONENTS — SVG based
+// CHART COMPONENTS
 // ═══════════════════════════════════════
 
-// 1. DONUT CHART
 const Donut=({data,size=160,hole=0.6,showLegend=true})=>{
   const total=data.reduce((s,d)=>s+d.v,0);
   if(total===0)return <div style={{textAlign:"center",color:T.txM,padding:20}}>Không có dữ liệu</div>;
@@ -204,7 +224,6 @@ const Donut=({data,size=160,hole=0.6,showLegend=true})=>{
   );
 };
 
-// 2. LINE / AREA CHART
 const AreaChart=({data,h=140,w=320,color=T.bl,showDots=true,fill=true})=>{
   const mx=Math.max(...data.map(d=>d.v),1);
   const pad={t:20,b:24,l:8,r:8};
@@ -224,7 +243,6 @@ const AreaChart=({data,h=140,w=320,color=T.bl,showDots=true,fill=true})=>{
   );
 };
 
-// 3. WATERFALL CHART
 const Waterfall=({items,h=170,w=340})=>{
   const vals=items.map(it=>it.v);
   const mx=Math.max(...vals.map(Math.abs),1);
@@ -248,7 +266,6 @@ const Waterfall=({items,h=170,w=340})=>{
   );
 };
 
-// 4. GAUGE / SPEEDOMETER
 const Gauge=({value,max=100,label,color=T.bl,size=120})=>{
   const pct=Math.min(value/max,1);
   const r=size/2-10, cx=size/2, cy=size/2+5;
@@ -270,7 +287,6 @@ const Gauge=({value,max=100,label,color=T.bl,size=120})=>{
   );
 };
 
-// 5. STACKED BAR (Thu vs Chi)
 const StackedBar=({data,h=150,w=320,lA="Thu",lB="Chi",cA=T.gn,cB=T.rd})=>{
   const mx=Math.max(...data.map(d=>d.a+d.b),1);
   const pad={t:16,b:24,l:8,r:8};
@@ -299,7 +315,6 @@ const StackedBar=({data,h=150,w=320,lA="Thu",lB="Chi",cA=T.gn,cB=T.rd})=>{
   );
 };
 
-// 6. PROGRESS BAR with labels
 const ProgressBar=({label,value,max,color=T.bl,sub})=>{
   const pct=max>0?Math.min(value/max*100,100):0;
   return (
@@ -316,7 +331,6 @@ const ProgressBar=({label,value,max,color=T.bl,sub})=>{
   );
 };
 
-// 7. GROUPED BAR (DT vs CP)
 const GroupedBar=({data,h=155,w=340,lA="Doanh thu",lB="Chi phí",cA=T.bl,cB=T.or})=>{
   const mx=Math.max(...data.flatMap(d=>[d.a,d.b]),1);
   const pad={t:18,b:24,l:8,r:8};
@@ -343,7 +357,7 @@ const GroupedBar=({data,h=155,w=340,lA="Doanh thu",lB="Chi phí",cA=T.bl,cB=T.or
   );
 };
 
-// ─── BASE COMPONENTS (existing) ───
+// ─── BASE COMPONENTS ───
 const Select=({label,value,onChange,options,w=140})=>(<div style={{display:"flex",alignItems:"center",gap:5}}><span style={{fontSize:10,color:T.txM,fontWeight:600,textTransform:"uppercase",letterSpacing:.6,whiteSpace:"nowrap"}}>{label}</span><select value={value} onChange={e=>onChange(e.target.value)} style={{background:T.alt,border:`1px solid ${T.bdr}`,borderRadius:6,padding:"5px 8px",color:T.tx,fontSize:11,fontWeight:500,cursor:"pointer",minWidth:w,outline:"none"}}>{options.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}</select></div>);
 const FilterRow=({children})=>(<div style={{display:"flex",flexWrap:"wrap",gap:10,marginBottom:12,padding:"8px 0",borderBottom:`1px solid ${T.bdr}15`}}>{children}</div>);
 const KPI=({label,value,sub,color=T.bl,accent})=>(<div style={{background:T.card,borderRadius:10,padding:"13px 15px",border:`1px solid ${T.bdr}`,flex:"1 1 145px",minWidth:140,position:"relative",overflow:"hidden"}}><div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:color}}/><div style={{fontSize:10,color:T.txD,marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:.7}}>{label}</div><div style={{fontSize:19,fontWeight:700,color:T.tx,fontFamily:"'DM Mono',monospace"}}>{value}</div>{sub&&<div style={{fontSize:9.5,color:accent||T.txD,marginTop:2}}>{sub}</div>}</div>);
@@ -371,6 +385,47 @@ const Tbl=({cols,rows,maxH=340})=>{
 const HBar=({data})=>data.map((d,i)=>{const mx=Math.max(...data.map(x=>x.v),1);return(<div key={i} style={{display:"flex",alignItems:"center",marginBottom:5,gap:5}}><div style={{width:90,fontSize:10,color:T.txD,textAlign:"right",flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{d.l}</div><div style={{flex:1,height:15,background:"rgba(0,0,0,0.05)",borderRadius:3,overflow:"hidden"}}><div style={{width:`${(d.v/mx)*100}%`,height:"100%",background:BC[i%BC.length],borderRadius:3}}/></div><div style={{width:62,fontSize:10,color:T.tx,fontFamily:"'DM Mono',monospace",textAlign:"right",flexShrink:0}}>{f(d.v)}</div></div>);});
 const Box=({children,title})=>(<div style={{background:T.card,borderRadius:10,padding:15,border:`1px solid ${T.bdr}`,marginBottom:11,display:"flex",flexDirection:"column"}}>{title&&<div style={{fontSize:12.5,fontWeight:700,color:T.tx,marginBottom:10,display:"flex",alignItems:"center",gap:5}}><div style={{width:3,height:14,background:T.bl,borderRadius:2}}/>{title}</div>}<div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",minHeight:0}}>{children}</div></div>);
 
+// Multi-select checkbox dropdown
+const MultiSelect=({label,options,selected,onChange,w=200})=>{
+  const [open,setOpen]=useState(false);
+  const allSel=selected.length===0;
+  const toggle=v=>{if(selected.includes(v))onChange(selected.filter(x=>x!==v));else onChange([...selected,v]);};
+  const display=allSel?"Tất cả":selected.length===1?(options.find(o=>o.value===selected[0])||{}).label||selected[0]:selected.length+" đã chọn";
+  return(
+    <div style={{display:"flex",alignItems:"center",gap:5,position:"relative"}}>
+      <span style={{fontSize:10,color:T.txM,fontWeight:600,textTransform:"uppercase",letterSpacing:.6,whiteSpace:"nowrap"}}>{label}</span>
+      <div onClick={()=>setOpen(!open)} style={{background:T.alt,border:"1px solid "+T.bdr,borderRadius:6,padding:"5px 8px",color:T.tx,fontSize:11,fontWeight:500,cursor:"pointer",minWidth:w,userSelect:"none",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{display}</span>
+        <span style={{fontSize:8,marginLeft:4}}>{open?"▲":"▼"}</span>
+      </div>
+      {open&&<div style={{position:"absolute",top:"100%",left:0,marginTop:2,background:T.card,border:"1px solid "+T.bdr,borderRadius:8,padding:6,zIndex:20,minWidth:w+40,maxHeight:200,overflowY:"auto",boxShadow:"0 8px 24px rgba(0,0,0,.15)"}}>
+        <div onClick={()=>{onChange([]);setOpen(false);}} style={{padding:"5px 8px",fontSize:10.5,color:allSel?T.bl:T.txD,cursor:"pointer",borderRadius:4,background:allSel?T.blG:"transparent",marginBottom:2}}>
+          {allSel?"✓ ":""}Tất cả
+        </div>
+        {options.map(o=>{
+          const s=selected.includes(o.value);
+          return <div key={o.value} onClick={()=>toggle(o.value)} style={{padding:"5px 8px",fontSize:10.5,color:s?T.bl:T.tx,cursor:"pointer",borderRadius:4,background:s?T.blG:"transparent"}}>
+            {s?"✓ ":"   "}{o.label}
+          </div>;
+        })}
+      </div>}
+    </div>
+  );
+};
+
+const DateRange=({label,from,to,onFrom,onTo})=>{
+  const toISO=v=>{if(!v||v.length!==10)return"";const p=v.split("/");return p[2]+"-"+p[1]+"-"+p[0];};
+  const fromISO=v=>{if(!v)return"";const p=v.split("-");return p[2]+"/"+p[1]+"/"+p[0];};
+  return(
+    <div style={{display:"flex",alignItems:"center",gap:5}}>
+      <span style={{fontSize:10,color:T.txM,fontWeight:600,textTransform:"uppercase",letterSpacing:.6,whiteSpace:"nowrap"}}>{label}</span>
+      <input type="date" value={toISO(from)} onChange={e=>onFrom(fromISO(e.target.value))} style={{background:T.alt,border:"1px solid "+T.bdr,borderRadius:6,padding:"4px 6px",color:T.tx,fontSize:11,outline:"none"}}/>
+      <span style={{color:T.txM,fontSize:10}}>→</span>
+      <input type="date" value={toISO(to)} onChange={e=>onTo(fromISO(e.target.value))} style={{background:T.alt,border:"1px solid "+T.bdr,borderRadius:6,padding:"4px 6px",color:T.tx,fontSize:11,outline:"none"}}/>
+    </div>
+  );
+};
+
 // ═══════════════════════════════════════
 // PAGE 1: TỔNG QUAN
 // ═══════════════════════════════════════
@@ -388,14 +443,11 @@ const P1=()=>{
   const ptra=cnPTr.reduce((s,c)=>s+c.ps-c.daTT,0);
   const tnF=TN.filter(t=>inDateRange(t.ng,dateFrom,dateTo));
   const tThu=tnF.reduce((s,t)=>s+t.thu,0), tChi=tnF.reduce((s,t)=>s+t.chi,0);
-  // Chart data
   const dtByM=MONTHS.map(m=>({l:"T"+m.slice(0,2),v:DT.filter(d=>gM(d.ng)===m).reduce((s,d)=>s+d.gt,0)}));
   const dtCum=dtByM.reduce((acc,d)=>{const last=acc.length?acc[acc.length-1].v:0;acc.push({l:d.l,v:last+d.v});return acc;},[]);
   const gbData=DM_CT.map(ct=>({l:ct.ten.split(" ").slice(0,2).join(" "),a:DT.filter(d=>d.da===ct.ma).reduce((s,d)=>s+d.gt,0),b:CP.filter(c=>c.da===ct.ma).reduce((s,c)=>s+c.ps,0)})).filter(d=>d.a>0||d.b>0);
   const marginPct=tongDT>0?pv(loiNhuan,tongDT):0;
-  // Dòng tiền thu vs chi theo tháng
   const cfByMonth=MONTHS.map(m=>{const d=TN.filter(t=>gM(t.ng)===m);return{l:"T"+m.slice(0,2),a:d.reduce((s,t)=>s+t.thu,0),b:d.reduce((s,t)=>s+t.chi,0)};});
-  // Tiến độ NT/HĐ
   const ntData=DM_CT.map((ct,i)=>{const dt=DT.filter(d=>d.da===ct.ma).reduce((s,d)=>s+d.gt,0);return{label:ct.ten.split(" ").slice(0,2).join(" "),value:dt,max:ct.hdTri,color:BC[i%BC.length]};});
   const tblDA=DM_CT.map(ct=>{const dt=DT.filter(d=>d.da===ct.ma).reduce((s,d)=>s+d.gt,0);const cp=CP.filter(c=>c.da===ct.ma).reduce((s,c)=>s+c.ps,0);const ln=dt-cp;return{da:ct.ten,tt:ct.tt,dt:f(dt),cp:f(cp),ln:f(ln),mg:ps(ln,dt),pt:f(CN.filter(c=>c.loai==="PT"&&c.da===ct.ma).reduce((s,c)=>s+c.ps-c.daTT,0)),_c:{ln:ln>=0?T.gn:T.rd,mg:ln>=0?T.gn:T.rd,tt:ct.tt==="Hoàn thành"?T.gn:T.am}};});
   return (<div>
@@ -473,53 +525,8 @@ const P2=()=>{
 };
 
 // ═══════════════════════════════════════
-// PAGE 3: CÔNG NỢ — Full redesign
-// Filters: Loại, KH (multi), CT (multi), Date range, Trạng thái
+// PAGE 3: CÔNG NỢ
 // ═══════════════════════════════════════
-
-// Multi-select checkbox dropdown
-const MultiSelect=({label,options,selected,onChange,w=200})=>{
-  const [open,setOpen]=useState(false);
-  const allSel=selected.length===0;
-  const toggle=v=>{if(selected.includes(v))onChange(selected.filter(x=>x!==v));else onChange([...selected,v]);};
-  const display=allSel?"Tất cả":selected.length===1?(options.find(o=>o.value===selected[0])||{}).label||selected[0]:selected.length+" đã chọn";
-  return(
-    <div style={{display:"flex",alignItems:"center",gap:5,position:"relative"}}>
-      <span style={{fontSize:10,color:T.txM,fontWeight:600,textTransform:"uppercase",letterSpacing:.6,whiteSpace:"nowrap"}}>{label}</span>
-      <div onClick={()=>setOpen(!open)} style={{background:T.alt,border:"1px solid "+T.bdr,borderRadius:6,padding:"5px 8px",color:T.tx,fontSize:11,fontWeight:500,cursor:"pointer",minWidth:w,userSelect:"none",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{display}</span>
-        <span style={{fontSize:8,marginLeft:4}}>{open?"▲":"▼"}</span>
-      </div>
-      {open&&<div style={{position:"absolute",top:"100%",left:0,marginTop:2,background:T.card,border:"1px solid "+T.bdr,borderRadius:8,padding:6,zIndex:20,minWidth:w+40,maxHeight:200,overflowY:"auto",boxShadow:"0 8px 24px rgba(0,0,0,.15)"}}>
-        <div onClick={()=>{onChange([]);setOpen(false);}} style={{padding:"5px 8px",fontSize:10.5,color:allSel?T.bl:T.txD,cursor:"pointer",borderRadius:4,background:allSel?T.blG:"transparent",marginBottom:2}}>
-          {allSel?"✓ ":""}Tất cả
-        </div>
-        {options.map(o=>{
-          const s=selected.includes(o.value);
-          return <div key={o.value} onClick={()=>toggle(o.value)} style={{padding:"5px 8px",fontSize:10.5,color:s?T.bl:T.tx,cursor:"pointer",borderRadius:4,background:s?T.blG:"transparent"}}>
-            {s?"✓ ":"   "}{o.label}
-          </div>;
-        })}
-      </div>}
-    </div>
-  );
-};
-
-// Date range picker
-const DateRange=({label,from,to,onFrom,onTo})=>{
-  // from/to = "dd/mm/yyyy", internal = "yyyy-mm-dd"
-  const toISO=v=>{if(!v||v.length!==10)return"";const p=v.split("/");return p[2]+"-"+p[1]+"-"+p[0];};
-  const fromISO=v=>{if(!v)return"";const p=v.split("-");return p[2]+"/"+p[1]+"/"+p[0];};
-  return(
-    <div style={{display:"flex",alignItems:"center",gap:5}}>
-      <span style={{fontSize:10,color:T.txM,fontWeight:600,textTransform:"uppercase",letterSpacing:.6,whiteSpace:"nowrap"}}>{label}</span>
-      <input type="date" value={toISO(from)} onChange={e=>onFrom(fromISO(e.target.value))} style={{background:T.alt,border:"1px solid "+T.bdr,borderRadius:6,padding:"4px 6px",color:T.tx,fontSize:11,outline:"none"}}/>
-      <span style={{color:T.txM,fontSize:10}}>→</span>
-      <input type="date" value={toISO(to)} onChange={e=>onTo(fromISO(e.target.value))} style={{background:T.alt,border:"1px solid "+T.bdr,borderRadius:6,padding:"4px 6px",color:T.tx,fontSize:11,outline:"none"}}/>
-    </div>
-  );
-};
-
 const P3=()=>{
   const parseD=s=>{const p=s.split("/");return new Date(+p[2],+p[1]-1,+p[0]);};
 
@@ -529,14 +536,12 @@ const P3=()=>{
   const [dateFrom,setDateFrom]=useState("01/01/2026");
   const [dateTo,setDateTo]=useState("26/05/2026");
 
-  // Enrich — chỉ tính conLai, không có hạn/trạng thái
   const enriched=useMemo(()=>CN.map(c=>{
     const conLai=c.ps-c.daTT;
     const ngDate=parseD(c.ng);
     return {...c,conLai,ngDate};
   }),[]);
 
-  // Filter
   const filtered=useMemo(()=>{
     return enriched.filter(c=>{
       if(loai!=="ALL"&&c.loai!==loai)return false;
@@ -547,13 +552,11 @@ const P3=()=>{
     });
   },[loai,khSel,daSel,dateFrom,dateTo,enriched]);
 
-  // KPIs
   const tongPS=filtered.reduce((s,c)=>s+c.ps,0);
   const tongDaTT=filtered.reduce((s,c)=>s+c.daTT,0);
   const netCN=tongPS-tongDaTT;
   const hieuQua=tongPS>0?pv(tongDaTT,tongPS):0;
 
-  // Options
   const dtOptions=useMemo(()=>{
     const list=[];
     if(loai!=="PTr")DM_KH.forEach(k=>list.push({label:k.ten,value:k.ma}));
@@ -563,7 +566,6 @@ const P3=()=>{
 
   const getName=(l,ma)=>l==="PT"?(DM_KH.find(k=>k.ma===ma)||{}).ten||ma:(DM_NCC.find(n=>n.ma===ma)||{}).ten||ma;
 
-  // Net công nợ theo NGÀY
   const netByDay=useMemo(()=>{
     const map={};
     filtered.forEach(c=>{
@@ -574,7 +576,6 @@ const P3=()=>{
     return Object.values(map).sort((a,b)=>parseD(a.ng)-parseD(b.ng));
   },[filtered]);
 
-  // Lũy kế công nợ theo NGÀY
   const cumByDay=useMemo(()=>{
     const sorted=[...filtered].sort((a,b)=>a.ngDate-b.ngDate);
     const map={};
@@ -586,12 +587,10 @@ const P3=()=>{
     return Object.entries(map).map(([ng,v])=>({l:ng.slice(0,5),v}));
   },[filtered]);
 
-  // Donut theo đối tượng
   const byDT={};
   filtered.forEach(c=>{const n=getName(c.loai,c.kh);byDT[n]=(byDT[n]||0)+c.conLai;});
   const dtDonut=Object.entries(byDT).map(([l,v])=>({l,v})).filter(d=>d.v>0).sort((a,b)=>b.v-a.v);
 
-  // TH theo CT
   const thCT=useMemo(()=>DM_CT.map(ct=>{
     const items=filtered.filter(c=>c.da===ct.ma);
     const ptPS=items.filter(c=>c.loai==="PT").reduce((s,c)=>s+c.ps,0);
@@ -604,7 +603,6 @@ const P3=()=>{
       _c:{ptCon:ptPS-ptTT>0?T.am:T.gn,ptrCon:ptrPS-ptrTT>0?T.pr:T.gn,net:net>=0?T.gn:T.rd}};
   }).filter(Boolean),[filtered]);
 
-  // Detail rows — không có hạn TT, trạng thái
   const detailRows=filtered.map(c=>{
     const ct=gCT(c.da);
     return {ng:c.ng,soCT:c.ct,doiTuong:getName(c.loai,c.kh),
@@ -696,31 +694,26 @@ const P4=()=>{
   const [dateTo,setDateTo]=useState("26/05/2026");
   const [daSel,setDaSel]=useState([]);
 
-  // Filter CP
   const cpF=daSel.length===0?CP:CP.filter(c=>daSel.includes(c.da));
   const tongCPTT=cpF.reduce((s,c)=>s+c.ps,0);
 
-  // Khấu hao 5 tháng
   const tsF=daSel.length===0?TSCD:TSCD.filter(t=>daSel.includes(t.da));
   const khByCT={};
   TSCD.forEach(t=>{khByCT[t.da]=(khByCT[t.da]||0)+t.ngGia/t.thKH*5;});
   const tongKH=tsF.reduce((s,t)=>s+t.ngGia/t.thKH*5,0);
   const tongCPDA=tongCPTT+tongKH;
 
-  // Cơ cấu CP theo nhóm (gồm KH)
   const byNhom={};
   cpF.forEach(c=>{const k=c.maCP;byNhom[k]=byNhom[k]||{ten:{CPNVL:"NVL",CPMTC:"Máy TC",CPNC:"Nhân công",TP:"Thầu phụ"}[k]||k,ps:0};byNhom[k].ps+=c.ps;});
   if(tongKH>0) byNhom["CPKH"]={ten:"Khấu hao TB",ps:tongKH};
   const nhomDonut=Object.entries(byNhom).map(([k,v])=>({l:v.ten,v:v.ps})).filter(d=>d.v>0).sort((a,b)=>b.v-a.v);
 
-  // CP theo CT (grouped bar)
   const cpCTBar=DM_CT.map(ct=>{
     const tt=CP.filter(c=>c.da===ct.ma).reduce((s,c)=>s+c.ps,0);
     const kh=khByCT[ct.ma]||0;
     return {l:ct.ten.split(" ").slice(0,2).join(" "),a:tt,b:kh};
   }).filter(d=>d.a>0||d.b>0);
 
-  // Bảng tổng hợp mới: STT, CT, Mã phí, Tên CP, Số dư ĐK, PS trong kỳ, Số dư CK, Ghi chú
   const tblCP=useMemo(()=>{
     let stt=0;
     const rows=[];
@@ -732,14 +725,12 @@ const P4=()=>{
         rows.push({stt,ct:ct.ten,maCP:c.maCP,tenCP:{CPNVL:"CP Nguyên vật liệu",CPMTC:"CP Máy thi công",CPNC:"CP Nhân công",TP:"Thầu phụ"}[c.maCP]||c.maCP,
           soDuDK:f(0),psKy:f(c.ps),soDuCK:f(c.ps),ghiChu:""});
       });
-      // Thêm dòng khấu hao
       const kh=khByCT[ct.ma]||0;
       if(kh>0){stt++;rows.push({stt,ct:ct.ten,maCP:"CPKH",tenCP:"Khấu hao thiết bị",soDuDK:f(0),psKy:f(kh),soDuCK:f(kh),ghiChu:"Phân bổ 5 tháng"});}
     });
     return rows;
   },[cpF]);
 
-  // VP data
   const cpVPDonut=Object.entries(CPVP).map(([k,v])=>({l:{luong:"Lương",bhxh:"BHXH",thue:"Thuê VP",dien:"Điện nước",vpp:"VPP",hc:"Hành chính",ql:"Quản lý"}[k],v}));
   const vpByMonth=MONTHS.map(m=>({l:"T"+m.slice(0,2),v:CPVP_total/5}));
 
@@ -750,7 +741,6 @@ const P4=()=>{
       <MultiSelect label="Công trình:" options={DM_CT.map(c=>({label:c.ten,value:c.ma}))} selected={daSel} onChange={setDaSel} w={200}/>
     </FilterRow>
 
-    {/* ── TỔNG QUAN CHI PHÍ ── */}
     <div style={{display:"flex",flexWrap:"wrap",gap:9,marginBottom:11}}>
       <KPI label="CP Trực tiếp" value={f(tongCPTT)} color={T.rd} sub="NVL + MTC + NC + TP"/>
       <KPI label="Khấu hao TB" value={f(tongKH)} color={T.pr} sub="5 tháng phân bổ"/>
@@ -759,7 +749,6 @@ const P4=()=>{
       <KPI label="Tổng chi phí" value={f(tongCPDA+CPVP_total)} color={"#c0392b"}/>
     </div>
 
-    {/* ═══ KHỐI 1: CHI PHÍ DỰ ÁN ═══ */}
     <div style={{fontSize:13,fontWeight:700,color:T.tx,marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
       <div style={{width:4,height:16,background:T.or,borderRadius:2}}/>Chi phí dự án / công trình
     </div>
@@ -789,7 +778,6 @@ const P4=()=>{
       ]} rows={tblCP} maxH={350}/>
     </Box>
 
-    {/* ═══ KHỐI 2: CHI PHÍ VĂN PHÒNG ═══ */}
     <div style={{fontSize:13,fontWeight:700,color:T.tx,marginTop:16,marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
       <div style={{width:4,height:16,background:T.pr,borderRadius:2}}/>Chi phí văn phòng
     </div>
@@ -812,6 +800,8 @@ const P4=()=>{
 };
 
 // ═══════════════════════════════════════
+// PAGE 5: DÒNG TIỀN
+// ═══════════════════════════════════════
 const P5=()=>{
   const [dateFrom,setDateFrom]=useState("01/01/2026");
   const [dateTo,setDateTo]=useState("26/05/2026");
@@ -826,7 +816,6 @@ const P5=()=>{
   const byMonth=MONTHS.map(m=>{const d=tnF.filter(t=>gM(t.ng)===m);return{l:"T"+m.slice(0,2),thu:d.reduce((s,t)=>s+t.thu,0),chi:d.reduce((s,t)=>s+t.chi,0)};});
   const byCT={};tnF.forEach(t=>{const n=gCT(t.da)?.ten?.split(" ").slice(0,2).join(" ")||(t.da?"Khác":"VP Cty");byCT[n]=byCT[n]||{thu:0,chi:0};byCT[n].thu+=t.thu;byCT[n].chi+=t.chi;});
   const cfCTData=Object.entries(byCT).map(([l,v])=>({l,v:v.thu-v.chi})).sort((a,b)=>b.v-a.v);
-  // Cumulative cash flow line
   const cumCF=byMonth.reduce((acc,m)=>{const last=acc.length?acc[acc.length-1].v:soDuDau;acc.push({l:m.l,v:last+m.thu-m.chi});return acc;},[]);
   const rowsThu=tnF.filter(t=>t.thu>0).map(t=>({ng:t.ng,ct:t.ctThu,dt:gCT(t.da)?.cdt||gCT(t.da)?.ten||"—",dg:t.dg,tm:t.loaiQ==="TM"?f(t.thu):"",nh:t.loaiQ==="NH"?f(t.thu):"",tong:f(t.thu)}));
   const rowsChi=tnF.filter(t=>t.chi>0).map(t=>({ng:t.ng,ct:t.ctChi,dt:gCT(t.da)?.ten?.split(" ").slice(0,3).join(" ")||"VP Cty",dg:t.dg,tm:t.loaiQ==="TM"?f(t.chi):"",nh:t.loaiQ==="NH"?f(t.chi):"",tong:f(t.chi)}));
@@ -857,7 +846,7 @@ const P5=()=>{
 };
 
 // ═══════════════════════════════════════
-// PAGE 6: HÀNG KHO — NXT, Tồn kho, Bảng kê Nhập/Xuất
+// PAGE 6: HÀNG KHO
 // ═══════════════════════════════════════
 const P6=()=>{
   const parseD=s=>{const p=s.split("/");return new Date(+p[2],+p[1]-1,+p[0]);};
@@ -867,9 +856,8 @@ const P6=()=>{
   const [dateFrom,setDateFrom]=useState("01/01/2026");
   const [dateTo,setDateTo]=useState("26/05/2026");
 
-  // Filter
   const khoF=useMemo(()=>{
-    const fd=new Date(dateFrom),td=new Date(dateTo);
+    const fd=parseD(dateFrom),td=parseD(dateTo);
     return KHO.filter(k=>{
       if(nccSel.length>0&&!nccSel.includes(k.ncc)) return false;
       if(daSel.length>0&&!daSel.includes(k.da)) return false;
@@ -879,7 +867,6 @@ const P6=()=>{
     });
   },[nccSel,daSel,dateFrom,dateTo]);
 
-  // KPIs
   const soVT=khoF.length;
   const tongNhapSL=khoF.reduce((s,k)=>s+k.nhapSL,0);
   const tongNhapTT=khoF.reduce((s,k)=>s+k.nhapSL*k.nhapGia,0);
@@ -887,16 +874,13 @@ const P6=()=>{
   const tongXuatTT=khoF.reduce((s,k)=>s+k.xuatSL*k.nhapGia,0);
   const tongTonSL=khoF.reduce((s,k)=>s+k.tonDau+k.nhapSL-k.xuatSL,0);
   const tongTonTT=khoF.reduce((s,k)=>s+(k.tonDau+k.nhapSL-k.xuatSL)*k.nhapGia,0);
-  // Chênh lệch kiểm kê (demo: giả lập 2% hao hụt)
   const chenhLechSL=Math.round(tongTonSL*0.02);
   const chenhLechTT=tongTonTT*0.02;
-  // Thiết bị
   const soTB=TSCD.length;
   const soHD=TSCD.filter(t=>t.tt==="Hoạt động").length;
   const tongNgGia=TSCD.reduce((s,t)=>s+t.ngGia,0);
   const tyLeHD=soTB>0?pv(soHD,soTB):0;
 
-  // Nhập-Xuất-Tồn theo tháng (line chart)
   const nxtByMonth=MONTHS.map(m=>{
     const mi=khoF.filter(k=>gM(k.ng)===m);
     return {
@@ -905,14 +889,12 @@ const P6=()=>{
       xuat:mi.reduce((s,k)=>s+k.xuatSL*k.nhapGia,0),
     };
   });
-  // tính tồn lũy kế
   const nxtCum=nxtByMonth.reduce((acc,m)=>{
     const last=acc.length?acc[acc.length-1].ton:khoF.reduce((s,k)=>s+k.tonDau*k.nhapGia,0);
     acc.push({...m,ton:last+m.nhap-m.xuat});
     return acc;
   },[]);
 
-  // Giá trị xuất kho theo CT (bar chart)
   const xuatByCT={};
   khoF.forEach(k=>{
     const ct=gCT(k.da);
@@ -921,7 +903,6 @@ const P6=()=>{
   });
   const xuatCTData=Object.entries(xuatByCT).map(([l,v])=>({l,v})).sort((a,b)=>b.v-a.v);
 
-  // NXT table rows
   const nxtRows=khoF.map((k,i)=>{
     const tc=k.tonDau+k.nhapSL-k.xuatSL;
     return {
@@ -961,7 +942,6 @@ const P6=()=>{
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:11}}>
       <Box title="Nhập — Xuất — Tồn theo tháng">
         <svg width="100%" viewBox="0 0 340 170" style={{overflow:"visible",display:"block",maxWidth:420,margin:"0 auto"}}>
-          {/* Grid lines */}
           {[0,.25,.5,.75,1].map((r,i)=><line key={i} x1={30} y1={15+r*120} x2={320} y2={15+r*120} stroke={T.bdr} strokeWidth=".5" strokeDasharray={r>0&&r<1?"3,3":"0"}/>)}
           {(()=>{
             const mx=Math.max(...nxtCum.flatMap(m=>[m.nhap,m.xuat,m.ton]),1);
@@ -1009,7 +989,7 @@ const P6=()=>{
 // ═══════════════════════════════════════
 const pages=[{id:0,label:"Tổng quan",icon:"◈",comp:P1},{id:1,label:"Doanh thu",icon:"▲",comp:P2},{id:2,label:"Chi phí",icon:"▤",comp:P4},{id:3,label:"Công nợ",icon:"◎",comp:P3},{id:4,label:"Dòng tiền",icon:"◆",comp:P5},{id:5,label:"Hàng kho",icon:"▦",comp:P6}];
 
-export default function App(){
+function App(){
   const [act,setAct]=useState(0);
   const Comp=pages[act].comp;
   return (
@@ -1029,3 +1009,9 @@ export default function App(){
     </div>
   );
 }
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(App));
+  </script>
+</body>
+</html>
